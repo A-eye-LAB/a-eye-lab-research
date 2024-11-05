@@ -43,8 +43,8 @@ Try the following parameter settings for the provided example images:
     param2=30  
     min_radius=0 
     max_radius=45 
-    canny_thr1 = 30
-    canny_th2 = 100
+    canny_thr1=30
+    canny_th2=100
     ```
 
 - `example/cataract2.jpg`
@@ -54,8 +54,8 @@ Try the following parameter settings for the provided example images:
     param2=30
     min_radius=0
     max_radius=30
-    canny_thr1 = 10
-    canny_th2 = 50
+    canny_thr1=10
+    canny_th2=50
     ```
 
 - `example/cataract3.jpg` & `example/cataract4.jpg`
@@ -65,8 +65,8 @@ Try the following parameter settings for the provided example images:
     param2=30
     min_radius=0
     max_radius=150
-    canny_thr1 = 30
-    canny_th2 = 30
+    canny_thr1=30
+    canny_th2=30
     ```
 
 ---
