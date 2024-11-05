@@ -5,25 +5,18 @@ import numpy as np
 class CircleDetection:
     def __init__(
         self,
-        image_path,
-        min_dist,
-        param1,
-        param2,
-        min_radius,
-        max_radius,
+        params,
         target_x,
         target_y,
-        canny_thr1,
-        canny_thr2,
     ):
-        self.image_path = image_path
-        self.min_dist = min_dist  # 원 사이 최소 거리
-        self.param1 = param1  # Canny 엣지 검출기 상한값
-        self.param2 = param2  # 중심 검출 임계값
-        self.min_radius = min_radius  # 최소 반지름 (홍채 추정치에 맞게 조정)
-        self.max_radius = max_radius  # 최대 반지름 (홍채 추정치에 맞게 조정)
-        self.canny_thr1 = canny_thr1  # Canny threshold1
-        self.canny_thr2 = canny_thr2  # Canny threshold2
+        self.image_path = params.image_path
+        self.min_dist = params.min_dist  # 원 사이 최소 거리
+        self.param1 = params.param1  # Canny 엣지 검출기 상한값
+        self.param2 = params.param2  # 중심 검출 임계값
+        self.min_radius = params.min_radius  # 최소 반지름 (홍채 추정치에 맞게 조정)
+        self.max_radius = params.max_radius  # 최대 반지름 (홍채 추정치에 맞게 조정)
+        self.canny_thr1 = params.canny_thr1  # Canny threshold1
+        self.canny_thr2 = params.canny_thr2  # Canny threshold2
         self.target_x = target_x
         self.target_y = target_y
 

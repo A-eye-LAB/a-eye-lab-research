@@ -55,14 +55,7 @@ def iris_detect(params: IrisDetectionParams):
 
     # Detect iris circles around the pupil
     circle_detector = CircleDetection(
-        image_path=params.image_path,
-        min_dist=params.min_dist,
-        param1=params.param1,
-        param2=params.param2,
-        min_radius=params.min_radius,
-        max_radius=params.max_radius,
-        canny_thr1=params.canny_thr1,
-        canny_thr2=params.canny_thr2,
+        params,
         target_x=target_x,
         target_y=target_y,
     )
@@ -85,9 +78,9 @@ if __name__ == "__main__":
         param1=30,  # Canny 엣지 검출기 상한값
         param2=30,  # 중심 검출 임계값
         min_radius=0,  # 최소 반지름 (홍채 추정치에 맞게 조정)
-        max_radius=150,  # 최대 반지름 (홍채 추정치에 맞게 조정)
-        canny_thr1=30,  # Canny threshold1
-        canny_thr2=30,  # Canny threshold2
+        max_radius=30,  # 최대 반지름 (홍채 추정치에 맞게 조정)
+        canny_thr1=10,  # Canny threshold1
+        canny_thr2=50,  # Canny threshold2
         save=True,  # Save the result image
     )
 
