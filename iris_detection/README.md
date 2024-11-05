@@ -38,32 +38,35 @@ Try the following parameter settings for the provided example images:
 
 - `example/cataract1.jpg` 
     ```
-    canny = (30, 100)
     min_dist=1  
     param1=30  
     param2=30  
     min_radius=0 
     max_radius=45 
+    canny_thr1 = 30
+    canny_th2 = 100
     ```
 
 - `example/cataract2.jpg`
     ```
-    canny = (10, 50)
     min_dist=1
     param1=30
     param2=30
     min_radius=0
     max_radius=30
+    canny_thr1 = 10
+    canny_th2 = 50
     ```
 
 - `example/cataract3.jpg` & `example/cataract4.jpg`
     ```
-    canny = (30, 30)
     min_dist=1
     param1=30
     param2=30
     min_radius=0
     max_radius=150
+    canny_thr1 = 30
+    canny_th2 = 30
     ```
 
 ---
