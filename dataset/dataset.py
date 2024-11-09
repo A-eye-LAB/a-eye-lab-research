@@ -7,10 +7,13 @@ from torchvision import transforms
 
 
 class SingleImageDataset(Dataset):
-    def __init__(self, root_dir):
+    def __init__(self, root_dir, transform={"train": transforms.ToTensor(), "test": transforms.ToTensor()}):
         self.root_dir = root_dir
-        self.transforms = transforms.Compose([transforms.ToTensor()])
+        self._state = "train"
+        self.transform = transform
+        self.prepare()
 
+    def prepare(self):
         self.image_paths, self.labels = self.get_label_image_paths(self.root_dir)
 
     def get_label_image_paths(self, root_dir):
@@ -24,14 +27,21 @@ class SingleImageDataset(Dataset):
 
         return image_paths, labels
 
+    def eval(self):
+        self._state = "test"
+
+    def train(self):
+        self._state = "train"
+
     def __len__(self):
         return len(self.labels)
 
     def __getitem__(self, idx):
         label = self.labels[idx]
         image = self.get_image(idx)
+        transform = self.transform[self._state]
 
-        return self.transforms(image), torch.tensor(label, dtype=torch.long)
+        return transform(image), torch.tensor(label, dtype=torch.float32)
 
     def get_image(self, idx):
         img_path = self.image_paths[idx]
@@ -40,9 +50,10 @@ class SingleImageDataset(Dataset):
 
 
 class MultipleImageDataset(SingleImageDataset):
-    def __init__(self, root_dir):
-        self.root_dir = root_dir
-        self.transforms = transforms.Compose([transforms.ToTensor()])
+    def __init__(self, root_dir, transform={"train": transforms.ToTensor(), "test": transforms.ToTensor()}):
+        super().__init__(root_dir, transform)
+
+    def prepare(self):
         self.image_paths = []
         self.labels = []
 
