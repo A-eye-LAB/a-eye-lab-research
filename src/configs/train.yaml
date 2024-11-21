@@ -1,0 +1,34 @@
+DEVICE: cuda
+
+MODEL:
+  NAME          : 'MLP'
+  NUM_CLASSES   : 10
+  PRETRAINED    : False
+
+DATASET:
+  TRAIN_DATA_DIR: []
+  NUM_WORKERS   : 16
+  RATIO         : 0.8
+
+TRAIN: 
+  BATCH_SIZE    : 128    # 배치 사이즈 증가
+  EPOCHS        : 200    # 에폭 증가
+  PATIENCE      : 10     # 패티언스 증가
+  AMP           : True   # 학습 속도 향상을 위해 AMP 활성화
+
+LOSS:
+  NAME: CrossEntropyLoss
+
+OPTIMIZER:
+  NAME: Adam
+  lr: 0.001             # 학습률 감소
+  weight_decay: 0.0001  # 가중치 감쇠 감소
+
+SCHEDULER:
+  scheduler_name: 'ReduceLROnPlateau'  # 스케줄러 변경
+  mode: 'max'
+  factor: 0.1
+  patience: 5
+  min_lr: 0.000001
+
+SAVE_DIR        : '/workspace/outputs'
