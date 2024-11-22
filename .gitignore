@@ -1,6 +1,12 @@
-.vscode
-__pycache__
-.python-version
-
 dataset/data/
 tmp
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+# C extensions
+*.so
+# VSCode
+.vscode
