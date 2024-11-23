@@ -12,7 +12,7 @@ class MNISTDataset(Dataset):
         
         # MNIST 데이터 로드
         mnist_dataset = datasets.MNIST(
-            root='./data',
+            root='./dataset/data',
             train=train,
             download=True,
             transform=transform

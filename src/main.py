@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from torch.amp import GradScaler
 
 # Model Imports
-from models.mlp import MLP
+from models.mlp import MLP_TEST
 
 # Module Imports
 from modules.trainer import Trainer
@@ -30,11 +30,17 @@ def parse_args():
                         required=True, 
                         help='Configuration file to use'
                         )
+
+    parser.add_argument('--resume',
+                        action='store_true',
+                        help="Resume training",
+                        )
+
     args = parser.parse_args()
 
     return args
 
-def main(cfg):
+def main(cfg, resume=False):
     
     device = torch.device(cfg['DEVICE'])
 
@@ -70,7 +76,8 @@ def main(cfg):
         device=device,
         checkpoint_dir=save_dir,
         train_loader=train_loader,
-        valid_loader=valid_loader
+        valid_loader=valid_loader,
+        resume=resume,
     )
 
     trainer.train()
@@ -80,4 +87,4 @@ if __name__ == '__main__':
     args = parse_args()
     cfg = load_yaml(args.cfg)
 
-    main(cfg)
+    main(cfg, args.resume)

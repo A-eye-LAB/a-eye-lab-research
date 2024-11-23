@@ -3,9 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 
-class MLP(nn.Module):
+class MLP_TEST(nn.Module):
     def __init__(self, num_classes, pretrained=False):
-        super(MLP, self).__init__()
+        super(MLP_TEST, self).__init__()
         self.fc1 = nn.Linear(28 * 28, 512)
         self.fc2 = nn.Linear(512, 256)
         self.fc3 = nn.Linear(256, num_classes)
