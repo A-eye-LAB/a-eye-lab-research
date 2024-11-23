@@ -28,11 +28,11 @@ class CustomImageDataset(Dataset):
         디렉토리에서 라벨이 된 이미지 로드
         디렉토리 구조
         dataset
-          ㄴ 0      : Cataract
-          ㄴ 1      : Nomal
+          ㄴ 0      : Nomal
+          ㄴ 1      : Cataract
         """
         print(f"Loading images from: {self.dataset_path}")
-        classes = {"0": 1, "1": 0}
+        classes = {"0": 0, "1": 1}
 
         for label_dir, label in classes.items():
             class_path = os.path.join(self.dataset_path, label_dir)
