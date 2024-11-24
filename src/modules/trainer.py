@@ -14,6 +14,10 @@ from modules.earlystop import EarlyStopping
 from tqdm import tqdm
 from typing import Tuple, Dict, Optional, Any
 
+import os
+import shutil
+from pathlib import Path
+
 class Trainer:
     def __init__(
             self, 
@@ -27,6 +31,7 @@ class Trainer:
             checkpoint_dir: str,                        # 체크포인트 저장 디렉토리 경로
             train_loader: DataLoader,                   # 훈련 데이터 로더
             valid_loader: Optional[DataLoader] = None,  # 검증 데이터 로더 (옵션)
+            resume: bool = False,
         ) -> None:
 
         self.model = model
@@ -39,7 +44,12 @@ class Trainer:
         self.checkpoint_dir = checkpoint_dir
         self.train_loader = train_loader
         self.valid_loader = valid_loader
-    
+
+        self.model_dir = self.checkpoint_dir / 'weights'
+        self.model_dir.mkdir(parents=True, exist_ok=True)
+
+        self.resume = resume    
+
     def train(self) -> None:
         """
         Full training logic
@@ -50,7 +60,32 @@ class Trainer:
             verbose=True
         ) if self.config["TRAIN"]["PATIENCE"] > 0 else None
 
-        for epoch in range(self.config["TRAIN"]["EPOCHS"]):
+        st_epoch = 0
+
+        if self.resume:
+            save_dir = self.config["SAVE_DIR"]
+
+            try:
+                weight_dir = [p for p in os.listdir(save_dir) if type(self.model).__name__ == "_".join(p.split("_")[:-2])]
+                weight_dir = save_dir / Path(weight_dir[-2]) / 'weights'
+                
+                weight_list = os.listdir(weight_dir)
+                def get_epoch(dir:str):
+                    return int(dir.split("_")[-1][:-3])
+                st_epoch = sorted(list(map(get_epoch, weight_list)))[-1] + 1
+
+                self.model.load_state_dict(torch.load(weight_dir/f'checkpoint_epoch_{st_epoch-1}.pt', weights_only=True))
+                self.scheduler.last_epoch = st_epoch
+
+            except IndexError:
+                print("\n===============================================================")
+                print("Model reload error: Check the latest directory of the model")
+                print(f"{type(self.model).__name__} within {save_dir}")
+                print("===============================================================")
+                shutil.rmtree(self.checkpoint_dir)
+                return False
+
+        for epoch in range(st_epoch, self.config["TRAIN"]["EPOCHS"]):
             try:
                 result = self._train_epoch(epoch, early_stopping)
                 # Early Stopping 체크
@@ -89,18 +124,13 @@ class Trainer:
             total_loss += loss.item()
             train_loss = total_loss / len(self.train_loader)
 
-            pbar.set_postfix(Loss=total_loss / len(self.train_loader), LR=LR)
-
-        train_loss = total_loss / len(self.train_loader)
+            pbar.set_postfix(Loss=train_loss / len(self.train_loader), LR=LR)
         
         # Validation 단계 실행
         valid_loss, val_metrics = self._valid_epoch()
         print_evaluation("validate", epoch, valid_loss, val_metrics)
 
-
-        model_dir = self.checkpoint_dir / 'weights'
-        model_dir.mkdir(parents=True, exist_ok=True)
-        checkpoint_path = model_dir / f'checkpoint_epoch_{epoch}.pt'
+        checkpoint_path = self.model_dir / f'checkpoint_epoch_{epoch}.pt'
 
         if early_stopping is not None:
             # Early Stopping 체크
