@@ -1,14 +1,23 @@
 DEVICE: cuda
+RANDOM_SEED: 321
 
 MODEL:
-  NAME          : 'MLP_TEST'
-  NUM_CLASSES   : 10
-  PRETRAINED    : False
+  NAME          : 'ViT_Large'
+  NUM_CLASSES   : 2
+  PRETRAINED    : True
 
 DATASET:
-  TRAIN_DATA_DIR: []
+  TRAIN_DATA_DIR: [
+    "/workspace/a-eye-lab-research/dataset/data/C001",
+    "/workspace/a-eye-lab-research/dataset/data/C002",
+    "/workspace/a-eye-lab-research/dataset/data/C003",
+    "/workspace/a-eye-lab-research/dataset/data/Cataract_Detection-using-CNN",
+    "/workspace/a-eye-lab-research/dataset/data/Cataract-Detection-and-Classification",
+    "/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_kersh",
+    "/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_nand"
+  ]
   NUM_WORKERS   : 16
-  RATIO         : 0.8
+  N_FOLDS       : 5
 
 TRAIN: 
   BATCH_SIZE    : 128    
@@ -32,3 +41,5 @@ SCHEDULER:
   min_lr: 0.000001
 
 SAVE_DIR        : '/workspace/outputs'
+
+WANDB_PROJECT   : "cataract-detection"

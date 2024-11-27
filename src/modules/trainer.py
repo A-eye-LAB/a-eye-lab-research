@@ -17,7 +17,7 @@ from typing import Tuple, Dict, Optional, Any
 import os
 import shutil
 from pathlib import Path
-
+import wandb
 class Trainer:
     def __init__(
             self, 
@@ -28,7 +28,9 @@ class Trainer:
             scaler: GradScaler,                         # Mixed precision scaler
             config: Dict[str, Any],                     # 설정 값 (dict 등)
             device: torch.device,                       # 사용되는 장치 (CPU, GPU 등)
+            wandb : wandb,                              # WandB 
             checkpoint_dir: str,                        # 체크포인트 저장 디렉토리 경로
+            fold_idx: int,                               # 폴드 인덱스
             train_loader: DataLoader,                   # 훈련 데이터 로더
             valid_loader: Optional[DataLoader] = None,  # 검증 데이터 로더 (옵션)
             resume: bool = False,
@@ -41,10 +43,11 @@ class Trainer:
         self.scaler = scaler
         self.config = config
         self.device = device
+        self.wandb = wandb
         self.checkpoint_dir = checkpoint_dir
         self.train_loader = train_loader
         self.valid_loader = valid_loader
-
+        self.fold_idx = fold_idx
         self.model_dir = self.checkpoint_dir / 'weights'
         self.model_dir.mkdir(parents=True, exist_ok=True)
 
@@ -130,6 +133,15 @@ class Trainer:
         valid_loss, val_metrics = self._valid_epoch()
         print_evaluation("validate", epoch, valid_loss, val_metrics)
 
+        self.wandb.log({
+            "fold_idx": self.fold_idx,
+            "epoch": epoch,
+            "learning_rate": LR,
+            "train/train_loss": train_loss,
+            "valid/valid_loss": valid_loss,
+            **val_metrics  # validation 로그 추가
+        })
+
         checkpoint_path = self.model_dir / f'checkpoint_epoch_{epoch}.pt'
 
         if early_stopping is not None:
@@ -143,7 +155,7 @@ class Trainer:
         return True
 
     @torch.no_grad()
-    def _valid_epoch(self) -> Dict[str, float]:
+    def _valid_epoch(self) -> Tuple[float, Dict[str, float]]:
         self.model.eval()
         total_loss = 0.0
         y_true = []

@@ -24,8 +24,8 @@ def get_optimizer(
         model: nn.Module, 
         optimizer_cfg: Dict[str, Any]
     ) -> Optimizer:
-
-    optimizer_name = optimizer_cfg.pop('NAME', None)
+    
+    optimizer_name = optimizer_cfg.get('NAME')
     
     if optimizer_name is None or optimizer_name not in OPTIMIZERS:
         supported_optimizers = ', '.join(OPTIMIZERS.keys())
@@ -34,8 +34,10 @@ def get_optimizer(
             f"Supported optimizers are: {supported_optimizers}"
         )
     
+    # optimizer 설정에서 NAME 키를 제외한 새로운 설정 딕셔너리 생성
+    optimizer_params = {k: v for k, v in optimizer_cfg.items() if k != 'NAME'}
+    
     wd_params, nwd_params = [], []
-
     for p in model.parameters():
         if p.dim() == 1:
             nwd_params.append(p)
@@ -48,8 +50,8 @@ def get_optimizer(
     ]
 
     optimizer_class = OPTIMIZERS[optimizer_name]
-
-    return optimizer_class(params=params, **optimizer_cfg)
+    
+    return optimizer_class(params=params, **optimizer_params)
 
 # 테스트 코드
 if __name__ == "__main__":
