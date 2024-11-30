@@ -82,7 +82,7 @@ def download_kaggle_cataract_nand(dataset_dir):
 DOWNLOAD_FUNCTIONS = {
     "Cataract_Detection-using-CNN": download_cataract_detection_using_cnn,
     "Cataract-Detection-and-Classification": download_cataract_detection_and_classification,
-    "kaggle_cataract_aksh": download_kaggle_cataract_aksh,
+    # "kaggle_cataract_aksh": download_kaggle_cataract_aksh, # salt-n-pepper noise 적용으로 버림
     "kaggle_cataract_kersh": download_kaggle_cataract_kersh,
     "kaggle_cataract_nand": download_kaggle_cataract_nand,
 }
