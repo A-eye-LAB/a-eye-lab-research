@@ -98,7 +98,7 @@ def main():
 
   
     dataset_dir = DATA_DIR / dataset_name  
-    processed_images_dir = dataset_dir / "cataract-image-dataset/processed_images/test" 
+    processed_images_dir = dataset_dir / "cataract-image-dataset/processed_images/train" 
     output_dir = Path("./dataset/data") / dataset_name  
 
     try:
