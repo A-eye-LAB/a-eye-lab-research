@@ -8,6 +8,7 @@ from torch.amp import GradScaler
 # Model Imports
 from models.mlp import MLP_TEST
 from models.vit import ViT_Large
+from models.swin import Swin_Large
 
 # Module Imports
 from modules.trainer import Trainer
@@ -27,9 +28,9 @@ setup_cudnn()
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', 
-                        type=str, 
-                        required=True, 
+    parser.add_argument('--cfg',
+                        type=str,
+                        required=True,
                         help='Configuration file to use'
                         )
 
@@ -43,7 +44,7 @@ def parse_args():
     return args
 
 def main(cfg, resume=False):
-    
+
     device = torch.device(cfg['DEVICE'])
     GROUP_NAME = "experiment-" + wandb.util.generate_id()
 
@@ -59,30 +60,31 @@ def main(cfg, resume=False):
         )
 
 
-        train_set, val_set = CombinedDataset(cfg["DATASET"]["TRAIN_DATA_DIR"], 
-                                            n_folds=cfg["DATASET"]["N_FOLDS"], 
+
+        train_set, val_set = CombinedDataset(cfg["DATASET"]["TRAIN_DATA_DIR"],
+                                            n_folds=cfg["DATASET"]["N_FOLDS"],
                                             fold_idx=fold_idx,
                                             random_seed=cfg["RANDOM_SEED"])
 
         train_loader = DataLoader(
-            train_set, 
+            train_set,
             batch_size=cfg["TRAIN"]["BATCH_SIZE"],
-            num_workers=cfg["DATASET"]["NUM_WORKERS"],  
-            shuffle=True, 
+            num_workers=cfg["DATASET"]["NUM_WORKERS"],
+            shuffle=True,
             pin_memory=True
         )
-        
+
         valid_loader = DataLoader(
-            val_set, 
-            batch_size=cfg["TRAIN"]["BATCH_SIZE"], 
-            num_workers=cfg["DATASET"]["NUM_WORKERS"], 
-            shuffle=False, 
+            val_set,
+            batch_size=cfg["TRAIN"]["BATCH_SIZE"],
+            num_workers=cfg["DATASET"]["NUM_WORKERS"],
+            shuffle=False,
             pin_memory=True
         )
 
         # Model Set
         model = eval('{}(num_classes={}, pretrained={})'.format(
-            cfg["MODEL"]["NAME"], 
+            cfg["MODEL"]["NAME"],
             cfg["MODEL"]["NUM_CLASSES"],
             cfg["MODEL"]["PRETRAINED"]
             ))
@@ -97,10 +99,10 @@ def main(cfg, resume=False):
         save_dir, name = dir_set(cfg["SAVE_DIR"], model)
 
         trainer = Trainer(
-            model=model, 
-            criterion=criterion, 
+            model=model,
+            criterion=criterion,
             optimizer=optimizer,
-            scheduler=scheduler, 
+            scheduler=scheduler,
             scaler=scaler,
             config=cfg,
             device=device,
