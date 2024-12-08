@@ -3,8 +3,18 @@ import onnxruntime as ort
 import torchvision.transforms as transforms
 from PIL import Image
 from src.models.swin import Swin_Large
+import argparse
 
 import time
+
+def argument():
+    parser = argparse.ArgumentParser(description="ONNX Model Prediction Script")
+
+    parser.add_argument('--model_path', type=str, required=True, help="torch model file path")
+    parser.add_argument('--onnx_path', type=str, required=False, help="onnx model file path", default='model.onnx')
+    parser.add_argument('--image_path', type=str, required=True, help="image file path")
+
+    return parser.parse_args()
 
 def load_model(model_path, num_classes=2):
     """pt file 인스턴스 생성"""
@@ -66,26 +76,37 @@ def convert_to_onnx(model, onnx_path):
     print(f"Model has been converted to ONNX and saved at {onnx_path}")
 
 if __name__ == '__main__':
-    # conver_script()
-    image_path = 'src/onnx/cataract.png'
-    model_pt_path = 'outputs/model.pt'
-    model_onnx_path = 'test.onnx'
 
+    args = argument()
 
+    # Set path
+    image_path = args.image_path
+    model_pt_path = args.model_path
+    model_onnx_path = args.onnx_path
+
+    # Load torch model
+    print(model_pt_path)
     model_pt = load_model(model_pt_path)
+
+    # Convert onnx
+    print(f'[INFO] Conver torch model to onnx model')
+    convert_to_onnx(model_pt, model_onnx_path)
+    print(f'save - {model_onnx_path}')
+
+    # Load onnx model
     model_onnx = load_onnx_model(model_onnx_path)
+
+    # Load image tensor
     image_tensor = preprocess_image(image_path)
 
+    # Comparing the torch model and onnx model
     start = time.time()
     predict_pt_model = predict_pt(model_pt, image_tensor)
-    print('*Predict script model')
-    print(predict_pt_model[1])
-    print(time.time() - start)
+    print(f'Predict script model')
+    print(f'    predict result : {predict_pt_model[1].cpu().numpy()}')
+    print(f'    predict time   : {time.time() - start}')
     start = time.time()
     predict_onnx_model = predict_onnx(model_onnx, image_tensor.cpu().numpy())
-    print('*Predict onnx model')
-    print(predict_onnx_model)
-    print(time.time() - start)
-
-    # print(predict_class)
-    # convert_to_onnx(model_pt, 'test.onnx')
+    print(f'Predict onnx model')
+    print(f'    predict result : {predict_onnx_model}')
+    print(f'    predict time   : {time.time() - start}')
