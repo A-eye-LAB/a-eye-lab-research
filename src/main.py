@@ -1,13 +1,10 @@
 # Torch Imports
 import torch
-import torch.nn as nn
-import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.amp import GradScaler
 
 # Model Imports
-from models.mlp import MLP_TEST
-from models.vit import ViT_Large
+from models import MLP_TEST, ViT_Large
 
 # Module Imports
 from modules.trainer import Trainer
@@ -25,82 +22,82 @@ import wandb
 fix_seeds(42)
 setup_cudnn()
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', 
-                        type=str, 
-                        required=True, 
-                        help='Configuration file to use'
-                        )
+    parser.add_argument("--cfg", type=str, required=True, help="Configuration file to use")
 
-    parser.add_argument('--resume',
-                        action='store_true',
-                        help="Resume training",
-                        )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume training",
+    )
 
     args = parser.parse_args()
 
     return args
 
+
 def main(cfg, resume=False):
-    
-    device = torch.device(cfg['DEVICE'])
+
+    device = torch.device(cfg["DEVICE"])
     GROUP_NAME = "experiment-" + wandb.util.generate_id()
 
     for fold_idx in range(cfg["DATASET"]["N_FOLDS"]):
-                # WandB Init
+        # WandB Init
         wandb.init(
             project=cfg["WANDB_PROJECT"],
             name=f"fold-{fold_idx}",
             group=GROUP_NAME,  # 그룹으로 모든 폴드를 묶음
             job_type="train",
             config=cfg,
-            reinit=True
+            reinit=True,
         )
 
-
-        train_set, val_set = CombinedDataset(cfg["DATASET"]["TRAIN_DATA_DIR"], 
-                                            n_folds=cfg["DATASET"]["N_FOLDS"], 
-                                            fold_idx=fold_idx,
-                                            random_seed=cfg["RANDOM_SEED"])
+        train_set, val_set = CombinedDataset(
+            cfg["DATASET"]["TRAIN_DATA_DIR"],
+            n_folds=cfg["DATASET"]["N_FOLDS"],
+            fold_idx=fold_idx,
+            random_seed=cfg["RANDOM_SEED"],
+        )
 
         train_loader = DataLoader(
-            train_set, 
+            train_set,
             batch_size=cfg["TRAIN"]["BATCH_SIZE"],
-            num_workers=cfg["DATASET"]["NUM_WORKERS"],  
-            shuffle=True, 
-            pin_memory=True
+            num_workers=cfg["DATASET"]["NUM_WORKERS"],
+            shuffle=True,
+            pin_memory=True,
         )
-        
+
         valid_loader = DataLoader(
-            val_set, 
-            batch_size=cfg["TRAIN"]["BATCH_SIZE"], 
-            num_workers=cfg["DATASET"]["NUM_WORKERS"], 
-            shuffle=False, 
-            pin_memory=True
+            val_set,
+            batch_size=cfg["TRAIN"]["BATCH_SIZE"],
+            num_workers=cfg["DATASET"]["NUM_WORKERS"],
+            shuffle=False,
+            pin_memory=True,
         )
 
         # Model Set
-        model = eval('{}(num_classes={}, pretrained={})'.format(
-            cfg["MODEL"]["NAME"], 
-            cfg["MODEL"]["NUM_CLASSES"],
-            cfg["MODEL"]["PRETRAINED"]
-            ))
+        model = eval(
+            "{}(num_classes={}, pretrained={})".format(
+                cfg["MODEL"]["NAME"], cfg["MODEL"]["NUM_CLASSES"], cfg["MODEL"]["PRETRAINED"]
+            )
+        )
         model = model.to(device)
 
         # Loss Function & Optimizer Set
-        criterion = get_loss(cfg['LOSS']['NAME'])
-        optimizer = get_optimizer(model, cfg['OPTIMIZER'])
-        scheduler = get_scheduler(optimizer, **cfg['SCHEDULER'])
+        criterion = get_loss(cfg["LOSS"]["NAME"])
+        optimizer = get_optimizer(model, cfg["OPTIMIZER"])
+        scheduler = get_scheduler(optimizer, **cfg["SCHEDULER"])
         scaler = GradScaler()
 
         save_dir, name = dir_set(cfg["SAVE_DIR"], model)
 
         trainer = Trainer(
-            model=model, 
-            criterion=criterion, 
+            model=model,
+            criterion=criterion,
             optimizer=optimizer,
-            scheduler=scheduler, 
+            scheduler=scheduler,
             scaler=scaler,
             config=cfg,
             device=device,
@@ -118,7 +115,7 @@ def main(cfg, resume=False):
     wandb.finish()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = parse_args()
     cfg = load_yaml(args.cfg)
 
