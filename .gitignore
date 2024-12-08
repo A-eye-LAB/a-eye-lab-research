@@ -10,6 +10,6 @@ __pycache__/
 *.so
 # VSCode
 .vscode
-
 outputs
 wandb
+.DS_Store
