@@ -4,7 +4,8 @@ from torch.utils.data import DataLoader
 from torch.amp import GradScaler
 
 # Model Imports
-from models import MLP_TEST, ViT_Large
+import models
+import torchvision.models as torchvision_models
 
 # Module Imports
 from modules.trainer import Trainer
@@ -36,6 +37,14 @@ def parse_args():
     args = parser.parse_args()
 
     return args
+
+
+def load_model(model_name, num_classes, pretrained):
+    if hasattr(models, model_name):
+        model = getattr(models, model_name)(num_classes=num_classes, pretrained=pretrained)
+    else:
+        model = getattr(torchvision_models, model_name)(num_classes=num_classes, pretrained=pretrained)
+    return model
 
 
 def main(cfg, resume=False):
@@ -78,11 +87,7 @@ def main(cfg, resume=False):
         )
 
         # Model Set
-        model = eval(
-            "{}(num_classes={}, pretrained={})".format(
-                cfg["MODEL"]["NAME"], cfg["MODEL"]["NUM_CLASSES"], cfg["MODEL"]["PRETRAINED"]
-            )
-        )
+        model = load_model(cfg["MODEL"]["NAME"], cfg["MODEL"]["NUM_CLASSES"], cfg["MODEL"]["PRETRAINED"])
         model = model.to(device)
 
         # Loss Function & Optimizer Set
