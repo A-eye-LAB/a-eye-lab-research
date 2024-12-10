@@ -7,6 +7,7 @@ from torch.amp import GradScaler
 import models
 import torchvision.models as torchvision_models
 
+
 # Module Imports
 from modules.trainer import Trainer
 from modules.datasets import CombinedDataset
@@ -48,8 +49,8 @@ def load_model(model_name, num_classes, pretrained):
 
 
 def main(cfg, resume=False):
+    device = torch.device(cfg['DEVICE'])
 
-    device = torch.device(cfg["DEVICE"])
     GROUP_NAME = "experiment-" + wandb.util.generate_id()
 
     for fold_idx in range(cfg["DATASET"]["N_FOLDS"]):
@@ -75,7 +76,7 @@ def main(cfg, resume=False):
             batch_size=cfg["TRAIN"]["BATCH_SIZE"],
             num_workers=cfg["DATASET"]["NUM_WORKERS"],
             shuffle=True,
-            pin_memory=True,
+            pin_memory=True
         )
 
         valid_loader = DataLoader(
@@ -83,6 +84,7 @@ def main(cfg, resume=False):
             batch_size=cfg["TRAIN"]["BATCH_SIZE"],
             num_workers=cfg["DATASET"]["NUM_WORKERS"],
             shuffle=False,
+
             pin_memory=True,
         )
 
