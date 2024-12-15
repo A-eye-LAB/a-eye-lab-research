@@ -1,0 +1,45 @@
+DEVICE: cuda
+RANDOM_SEED: 321
+
+MODEL:
+  NAME          : 'ConvNextBase'
+  NUM_CLASSES   : 2
+  PRETRAINED    : True
+
+DATASET:
+  TRAIN_DATA_DIR: [
+    "data/C001",
+    "data/C002",
+    "data/C003",
+    "data/Cataract_Detection-using-CNN",
+    "data/Cataract-Detection-and-Classification",
+    "data/kaggle_cataract_kersh",
+    # "data/kaggle_cataract_nand"
+  ]
+  NUM_WORKERS   : 16
+  N_FOLDS       : 5
+
+TRAIN: 
+  BATCH_SIZE    : 64    
+  EPOCHS        : 100    
+  PATIENCE      : 10     
+  AMP           : True   
+
+LOSS:
+  NAME: CrossEntropyLoss
+
+OPTIMIZER:
+  NAME: Adam
+  lr: 0.001             
+  weight_decay: 0.0001  
+
+SCHEDULER:
+  scheduler_name: 'ReduceLROnPlateau' 
+  mode: 'max'
+  factor: 0.1
+  patience: 5
+  min_lr: 0.000001
+
+SAVE_DIR        : './results'
+
+WANDB_PROJECT   : "cataract-detection"
