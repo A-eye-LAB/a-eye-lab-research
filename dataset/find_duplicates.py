@@ -7,16 +7,19 @@ import os
 from argparse import ArgumentParser
 from collections import defaultdict
 
+from PIL import Image
+from tqdm import tqdm
+
 
 def find_duplicate_images(dataset_path):
     hash_dict = defaultdict(list)
     for root, _, files in os.walk(dataset_path):
-        for img_file in files:
+        for img_file in tqdm(files, desc=root):
             if not img_file.endswith((".jpg", ".jpeg", ".png", ".webp")):
                 continue
             img_path = os.path.join(root, img_file)
-            with open(img_path, "rb") as f:
-                img_hash = hashlib.md5(f.read()).hexdigest()
+            img = Image.open(img_path).resize((100, 100)).convert("RGB")
+            img_hash = hashlib.md5(img.tobytes()).hexdigest()
             hash_dict[img_hash].append(img_path)
     duplicates = [files for files in hash_dict.values() if len(files) > 1]
     return duplicates
