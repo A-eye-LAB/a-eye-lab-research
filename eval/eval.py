@@ -57,6 +57,19 @@ class CustomImageDataset(Dataset):
         return self.data[idx], self.labels[idx]
 
 
+def specificity_score(y_true, y_pred, zero_division=0):
+    """
+    특이도(Specificity) 계산 함수
+    TN / (TN + FP)
+    """
+    cm = confusion_matrix(y_true, y_pred)
+    if len(cm) <= 1:
+        return zero_division
+    tn, fp = cm[0][0], cm[0][1]
+    if tn + fp == 0:
+        return zero_division
+    return tn / (tn + fp)
+
 class ImageTestEvaluator:
     def __init__(self, model, dataset_path, batch_size=16, image_size=(224, 224), device="cpu"):
         """
@@ -112,22 +125,26 @@ class ImageTestEvaluator:
             "Recall": recall_score(y_true, y_pred, zero_division=0),
             "F1 Score": f1_score(y_true, y_pred),
             "Accuracy": accuracy_score(y_true, y_pred),
+            "Specificity": specificity_score(y_true, y_pred, zero_division=0),
         }
 
         return metrics
 
 
 if __name__ == "__main__":
-    from torchvision.models import resnet18
+    from models.vit import ViT_Large
 
     # Test Model
-    model = resnet18(pretrained=True)
-    model.fc = torch.nn.Linear(model.fc.in_features, 2)
+    model = ViT_Large(num_classes=2, pretrained=False)
+    model_path = "/workspace/outputs/ViT_Large_20241216_042851/weights/checkpoint_epoch_12.pt"
+    model.load_state_dict(torch.load(model_path, map_location="cuda", weights_only=True))
+    model.to("cuda")
+    model.eval()
 
 
     ###########
-    dataset_path = "../test/Test"
-    evaluator = ImageTestEvaluator(model, dataset_path, image_size=(224, 224), device="cpu")
+    dataset_path = "/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_nand"
+    evaluator = ImageTestEvaluator(model, dataset_path, image_size=(224, 224), device="cuda")
 
     evaluator.load_data()
     results = evaluator.evaluate()
@@ -137,5 +154,3 @@ if __name__ == "__main__":
         print(f"{metric}:")
         print(value)
         print('\n')
-
-    ###########

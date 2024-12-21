@@ -7,7 +7,7 @@ class ViT_Large(nn.Module):
 
         # timm을 사용해 vit_large 모델을 불러옵니다.
         self.model = timm.create_model(
-            'vit_tiny_patch16_224.augreg_in21k_ft_in1k', 
+            'vit_large_patch16_224.augreg_in21k', 
             pretrained=pretrained
         )
         
