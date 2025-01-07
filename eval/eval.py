@@ -83,10 +83,18 @@ class ImageTestEvaluator:
         self.test_labels = []
         self.batch_size = batch_size
 
+        self.norm = {
+            'mean': (0.485, 0.456, 0.406),
+            'std': (0.229, 0.224, 0.225)
+        }
+
         # Image transformation
         self.transform = transforms.Compose([
-            transforms.Resize(image_size),
+            #transforms.Resize(image_size),
+            transforms.Resize(image_size[0]),
+            transforms.CenterCrop(image_size),
             transforms.ToTensor(),
+            transforms.Normalize(**self.norm),
         ])
 
     def load_data(self):
@@ -132,7 +140,10 @@ class ImageTestEvaluator:
 
 
 if __name__ == "__main__":
-    from models.vit import ViT_Large
+    #from models.vit import ViT_Large
+    import sys
+    sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)),".."))
+    from train.models import *
 
     # Test Model
     model = ViT_Large(num_classes=2, pretrained=False)

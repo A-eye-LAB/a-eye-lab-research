@@ -5,7 +5,8 @@ from torch.utils.data import Dataset, Subset
 
 # ETC Imports
 import os
-from sklearn.model_selection import StratifiedKFold
+import numpy as np
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from PIL import Image
 from typing import Tuple, List
 
@@ -20,14 +21,16 @@ class CombinedDataset:
             'std': (0.229, 0.224, 0.225)
         }
         self.transform = transforms.Compose([
+            #transforms.Resize((224, 224)),
+            transforms.Resize(224),
+            transforms.CenterCrop((224,224)),
             transforms.ToTensor(),
-            transforms.Resize((224, 224)),
             transforms.Normalize(**self.norm),
         ])
         self.combined_train_dataset, self.combined_val_dataset = self.process_datasets()
 
     def create_dataset(self, root_dir: str) -> Dataset:
-        return datasets.ImageFolder(root=root_dir, transform=self.transform)
+        return datasets.ImageFolder(root=root_dir, transform=self.transform, allow_empty=True)
 
     def process_datasets(self) -> Tuple[Dataset, Dataset]:
         all_train_datasets = []
@@ -62,15 +65,28 @@ class CombinedDataset:
         targets = dataset.targets
         indices = list(range(len(targets)))
         
-        # StratifiedKFold 사용
-        skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=random_seed)
+        if n_folds==1:
+            train_idx, val_idx = train_test_split(
+                                    np.arange(len(targets)),
+                                    test_size=0.2,
+                                    random_state=random_seed,
+                                    shuffle=True,
+                                    stratify=targets
+                                )
+            train_dataset = Subset(dataset, train_idx)
+            val_dataset = Subset(dataset, val_idx)
+            return train_dataset, val_dataset
         
-        # 현재 fold_idx에 해당하는 분할 찾기
-        for i, (train_idx, val_idx) in enumerate(skf.split(indices, targets)):
-            if i == fold_idx:
-                train_dataset = Subset(dataset, train_idx)
-                val_dataset = Subset(dataset, val_idx)
-                return train_dataset, val_dataset
+        else:
+            # StratifiedKFold 사용
+            skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=random_seed)
+        
+            # 현재 fold_idx에 해당하는 분할 찾기
+            for i, (train_idx, val_idx) in enumerate(skf.split(indices, targets)):
+                if i == fold_idx:
+                    train_dataset = Subset(dataset, train_idx)
+                    val_dataset = Subset(dataset, val_idx)
+                    return train_dataset, val_dataset
         
         raise ValueError(f"Fold index {fold_idx} is out of range")
 
