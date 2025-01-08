@@ -10,6 +10,19 @@ from sklearn.model_selection import StratifiedKFold, train_test_split
 from PIL import Image
 from typing import Tuple, List
 
+class TransformableSubset(Subset):
+    def __init__(self, dataset: Dataset, indices: List[int], transform=None):
+        super().__init__(dataset, indices)
+        self.transform = transform
+
+    def __getitem__(self, idx: int):
+        item = super().__getitem__(idx)
+        if self.transform:
+            image, label = item
+            image = self.transform(image)
+            return image, label
+        return item
+    
 class CombinedDataset:
     def __init__(self, root_dirs: List[str], n_folds: int = 5, fold_idx: int = 0, random_seed: int = 321):
         self.root_dirs = root_dirs
@@ -20,17 +33,28 @@ class CombinedDataset:
             'mean': (0.485, 0.456, 0.406),
             'std': (0.229, 0.224, 0.225)
         }
-        self.transform = transforms.Compose([
+        self.transform_train = transforms.Compose([
+            #transforms.Resize((224, 224)),
+            transforms.Resize(224),
+            transforms.CenterCrop((224,224)),
+            #transforms.RandomHorizontalFlip(p=0.5),
+            #transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
+            transforms.ToTensor(),
+            transforms.Normalize(**self.norm),
+        ])
+        self.transform_val = transforms.Compose([
             #transforms.Resize((224, 224)),
             transforms.Resize(224),
             transforms.CenterCrop((224,224)),
             transforms.ToTensor(),
             transforms.Normalize(**self.norm),
         ])
+
         self.combined_train_dataset, self.combined_val_dataset = self.process_datasets()
 
     def create_dataset(self, root_dir: str) -> Dataset:
-        return datasets.ImageFolder(root=root_dir, transform=self.transform, allow_empty=True)
+        #return datasets.ImageFolder(root=root_dir, transform=self.transform, allow_empty=True)
+        return datasets.ImageFolder(root=root_dir, allow_empty=True)
 
     def process_datasets(self) -> Tuple[Dataset, Dataset]:
         all_train_datasets = []
@@ -47,6 +71,10 @@ class CombinedDataset:
                                                             n_folds=self.n_folds,
                                                             random_seed=self.random_seed)
             
+            # Apply transform to subsets
+            train_dataset = TransformableSubset(train_dataset.dataset, train_dataset.indices, transform=self.transform_train)
+            val_dataset = TransformableSubset(val_dataset.dataset, val_dataset.indices, transform=self.transform_val)
+
             self.print_class_statistics(train_dataset, val_dataset)
             
             all_train_datasets.append(train_dataset)
