@@ -2,7 +2,11 @@ import torch
 import torch.onnx
 import onnx
 from onnxruntime.quantization import quantize_dynamic, QuantType
-from models.vit import ViT_Large
+import os
+import sys
+sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)),".."))
+from train.models import *
+
 def export_to_onnx(model, input_shape, save_path):
     """PyTorch 모델을 ONNX로 변환"""
     model.eval()

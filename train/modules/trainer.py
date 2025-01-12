@@ -149,6 +149,14 @@ class Trainer:
             early_stopping(valid_loss, self.model, path=checkpoint_path)
             if early_stopping.early_stop:
                 return False
+        else:
+            try:
+                torch.save(self.model.state_dict(), checkpoint_path)
+                print(f"Model saved at {checkpoint_path}")
+            except Exception as e:
+                print(f"Error saving model: {e}")
+            if epoch != 0:
+                os.remove(self.model_dir/f'checkpoint_epoch_{epoch-1}.pt')
 
         self.scheduler.step(valid_loss)
 
