@@ -6,6 +6,7 @@ from torch.amp import GradScaler
 # Model Imports
 import models
 import torchvision.models as torchvision_models
+# from models.efficient import EfficientNet
 
 
 # Module Imports
@@ -46,7 +47,6 @@ def load_model(model_name, num_classes, pretrained):
     else:
         model = getattr(torchvision_models, model_name)(num_classes=num_classes, pretrained=pretrained)
     return model
-
 
 def main(cfg, resume=False):
     device = torch.device(cfg['DEVICE'])
@@ -89,6 +89,10 @@ def main(cfg, resume=False):
         )
 
         # Model Set
+        # model = EfficientNet(
+        #     num_classes=cfg["MODEL"]["NUM_CLASSES"],
+        #     pretrained=cfg["MODEL"]["PRETRAINED"],
+        # )
         model = load_model(cfg["MODEL"]["NAME"], cfg["MODEL"]["NUM_CLASSES"], cfg["MODEL"]["PRETRAINED"])
         model = model.to(device)
 
