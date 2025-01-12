@@ -100,10 +100,18 @@ class ONNXImageTestEvaluator:
         # 입력 이름 가져오기
         self.input_name = self.session.get_inputs()[0].name
 
+        self.norm = {
+            'mean': (0.485, 0.456, 0.406),
+            'std': (0.229, 0.224, 0.225)
+        }
+
         # Image transformation
         self.transform = transforms.Compose([
-            transforms.Resize(image_size),
+            #transforms.Resize(image_size),
+            transforms.Resize(image_size[0]),
+            transforms.CenterCrop(image_size),
             transforms.ToTensor(),
+            transforms.Normalize(**self.norm),
         ])
 
     def load_data(self):
@@ -191,6 +199,8 @@ if __name__ == "__main__":
 
     # 결과 출력
     for metric, value in results.items():
-        print(f"{metric}:")
-        print(value)
-        print('\n')
+        if metric=="Confusion Matrix":
+            print(f"\n{metric}")
+            print(value,"\n")
+        else:
+            print(f"{metric:<15} : {value:.4f}")
