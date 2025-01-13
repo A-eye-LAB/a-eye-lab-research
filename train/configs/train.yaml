@@ -1,0 +1,46 @@
+DEVICE: cuda
+RANDOM_SEED: 321
+
+MODEL:
+  NAME          : 'ViT_Large'
+  NUM_CLASSES   : 2
+  PRETRAINED    : True
+
+DATASET:
+  TRAIN_DATA_DIR: [
+    "/workspace/a-eye-lab-research/dataset/data/C001",
+    "/workspace/a-eye-lab-research/dataset/data/C002",
+    "/workspace/a-eye-lab-research/dataset/data/C003",
+    "/workspace/a-eye-lab-research/dataset/data/Cataract_Detection-using-CNN",
+    "/workspace/a-eye-lab-research/dataset/data/Cataract-Detection-and-Classification",
+    # "/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_aksh",
+    "/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_kersh"
+    # "/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_nand"
+  ]
+  NUM_WORKERS   : 16
+  N_FOLDS       : 5
+
+TRAIN: 
+  BATCH_SIZE    : 128    
+  EPOCHS        : 100    
+  PATIENCE      : 5     
+  AMP           : True   
+
+LOSS:
+  NAME: CrossEntropyLoss
+
+OPTIMIZER:
+  NAME: AdamW
+  lr: 0.001             
+  weight_decay: 0.0001  
+
+SCHEDULER:
+  scheduler_name: 'ReduceLROnPlateau'
+  mode: 'max'
+  factor: 0.1
+  patience: 5
+  min_lr: 0.000001
+
+SAVE_DIR        : '/workspace/outputs'
+
+WANDB_PROJECT   : "cataract-detection"
