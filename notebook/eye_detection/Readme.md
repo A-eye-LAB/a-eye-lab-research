@@ -11,10 +11,11 @@ $ cd notebook/eye_detection
 $ pip install -r requirements_eye.txt
 ```
 
-## Features
-전처리 방법 
-    - 백내장 탐지 모델에 적용되는 전처리 방식 그대로 사용 
-    
+## Issue
+1. 전처리 방법 
+    - 백내장 탐지 모델에 적용되는 전처리 방식으로 했을때 성능이 더 안좋게 나와서 우선 다르게 테스트 진행 중
+    - 전처리 코드 : utils.py > preprocess_image 함수
+2. 파인튜닝된 mobilenetv3(백내장분류 모델)로 했을때, 튜닝 안한 mobilenetv3 모델 성능이 더 좋음..
 
 ## Usage
 ### 0. mobilnetv3_large 모델 다운로드 받기 
