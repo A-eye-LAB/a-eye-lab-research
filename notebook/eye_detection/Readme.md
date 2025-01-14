@@ -1,5 +1,5 @@
 # Eye Detection Code
-Eye Detection Repository
+눈 분류 코드
 
 ## Requirements
 - python 3.9.20
@@ -89,3 +89,10 @@ eye_detection/
 ├── requirements_eye.txt     # 프로젝트의 필수 라이브러리 목록
 └── README.md                
 ```
+
+## TODO
+- [ ] 전처리 방식 확인 
+    - 현재 적용된 전처리 방식과 백내장 학습할 때 적용되는 전처리 방식이 다른 것 같음.
+- [ ] 모델이 제대로 분류하지 못하는 테스트셋 확인해보기 
+- [ ] 백내장 분류 모델과 눈 분류 모델 분리 고려..?
+    - 튜닝된 모델로 테스트해보니 생각보다 성능이 더 안좋은 것 같음. 
