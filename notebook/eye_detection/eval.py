@@ -41,7 +41,7 @@ def process_file(model, file_path, label, mean_embedding, threshold):
     각 파일에 대한 is_eye_image 처리 함수.
     """
     result, similarity = is_eye_image(model, file_path, mean_embedding, threshold)
-    return label, result * 1
+    return file_path, label, result * 1
 
 
 def eval(model, data_dir, mean_embedding, threshold, num_threads):
@@ -65,7 +65,7 @@ def eval(model, data_dir, mean_embedding, threshold, num_threads):
                 )
 
         for future in tqdm(futures, desc="Evaluating", total=len(futures)):
-            label, prediction = future.result()
+            file_path, label, prediction = future.result()
             y_true.append(label)
             y_pred.append(prediction)
 

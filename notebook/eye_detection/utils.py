@@ -16,7 +16,7 @@ from models.mv3 import MobileNet_V3_Large
 from scipy.spatial.distance import cosine
 
 
-def load_model(tuning_status, model_path):
+def load_model(tuning_status, model_path=""):
     """MobileNetV3 모델 로드"""
 
     if tuning_status:
