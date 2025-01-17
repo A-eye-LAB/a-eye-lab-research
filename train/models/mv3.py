@@ -26,7 +26,8 @@ class MobileNet_V3_Large(nn.Module):
         self.model.classifier = nn.Linear(in_features=in_features, out_features=num_classes)
 
     def forward(self, x):
-        return self.model(x)
+        features = self.model.forward_features(x)
+        return self.model(x), features
 
 if __name__ == '__main__':
     model = MobileNet_V3_Large(num_classes=2, pretrained=False)
