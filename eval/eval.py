@@ -118,7 +118,7 @@ class ImageTestEvaluator:
             for data, label in tqdm(self.dataloader, desc='Evaluationg', unit='batch'):
                 data = data.to(self.device)
 
-                output = self.model(data)
+                output = self.model(data)[0]
                 preds = torch.argmax(output, dim=1).cpu().numpy()
                 all_preds.extend(preds)
                 all_labels.extend(label.cpu().numpy())
@@ -146,8 +146,9 @@ if __name__ == "__main__":
     from train.models import *
 
     # Test Model
-    model = ViT_Large(num_classes=2, pretrained=False)
-    model_path = "/workspace/outputs/ViT_Large_20241216_042851/weights/checkpoint_epoch_12.pt"
+    #model = ViT_Large(num_classes=2, pretrained=False)
+    model = MobileNet_V3_Large(num_classes=2, pretrained=False)
+    model_path = "/workspace/outputs/MobileNet_V3_Large_20250118_103143/weights/checkpoint_epoch_15.pt"
     model.load_state_dict(torch.load(model_path, map_location="cuda", weights_only=True))
     model.to("cuda")
     model.eval()
@@ -162,6 +163,8 @@ if __name__ == "__main__":
 
     # Display results
     for metric, value in results.items():
-        print(f"{metric}:")
-        print(value)
-        print('\n')
+        if metric=="Confusion Matrix":
+            print(f"\n{metric}")
+            print(value,"\n")
+        else:
+            print(f"{metric:<15} : {value:.4f}")
