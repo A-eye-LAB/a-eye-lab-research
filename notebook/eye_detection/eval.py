@@ -36,15 +36,15 @@ def get_args():
     return args
 
 
-def process_file(model, file_path, label, mean_embedding, threshold):
+def process_file(model, file_path, label, mean_embedding, tuning_status, threshold):
     """
     각 파일에 대한 is_eye_image 처리 함수.
     """
-    result, similarity = is_eye_image(model, file_path, mean_embedding, threshold)
+    result, similarity = is_eye_image(model, file_path, mean_embedding, tuning_status, threshold)
     return file_path, label, result * 1
 
 
-def eval(model, data_dir, mean_embedding, threshold, num_threads):
+def eval(model, data_dir, mean_embedding, tuning_status, threshold, num_threads):
     classes = {"eye": 1, "no eye": 0}
 
     y_true = []
@@ -60,7 +60,7 @@ def eval(model, data_dir, mean_embedding, threshold, num_threads):
                 file_path = os.path.join(class_path, file_name)
                 futures.append(
                     executor.submit(
-                        process_file, model, file_path, label, mean_embedding, threshold
+                        process_file, model, file_path, label, mean_embedding, tuning_status, threshold
                     )
                 )
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     mean_embedding = load_mean_embedding(args.embedding_file)
     model = load_model(args.tuning, args.model_path)
     metrics = eval(
-        model, args.data_dir, mean_embedding, args.threshold, args.num_threads
+        model, args.data_dir, mean_embedding, args.tuning, args.threshold, args.num_threads
     )
     print(metrics)
 

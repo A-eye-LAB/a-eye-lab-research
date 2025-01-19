@@ -50,7 +50,7 @@ def verify_onnx_model(onnx_path):
 
 if __name__ == "__main__":
     # 사용 예시
-    model_path = "/workspace/outputs/MobileNet_V3_Large_20250117_082314/weights/checkpoint_epoch_4.pt"
+    model_path = "/workspace/outputs/MobileNet_V3_Large_20250119_053236/weights/checkpoint_epoch_15.pt"
     model = MobileNet_V3_Large(num_classes=2, pretrained=False)  # 여기에 실제 PyTorch 모델을 넣으세요
     model.load_state_dict(torch.load(model_path, map_location="cuda", weights_only=True))
     model.to("cuda")
@@ -65,5 +65,5 @@ if __name__ == "__main__":
     verify_onnx_model(onnx_path)
     
     # 양자화
-    quantized_path = "/workspace/model_quantized.onnx"
+    quantized_path = "./model_quantized.onnx"
     quantize_onnx_model(onnx_path, quantized_path)

@@ -45,17 +45,20 @@ def get_args():
     return args
 
 
-def extract_embedding(image_path):
+def extract_embedding(image_path, tuning_status):
     """임베딩 추출 함수"""
 
     input_tensor = preprocess_image(image_path)
     with torch.no_grad():
-        embedding = model(input_tensor).squeeze().numpy()
+        if tuning_status:
+            embedding = model(input_tensor)[1].squeeze().numpy()
+        else:
+            embedding = model(input_tensor).squeeze().numpy()
 
     return embedding
 
 
-def calculate_mean_embedding(image_dirs, batch_size=128, save_path=None):
+def calculate_mean_embedding(image_dirs, tuning_status, batch_size=128, save_path=None):
     """평균 임베딩 계산 함수"""
 
     embeddings = []
@@ -82,7 +85,7 @@ def calculate_mean_embedding(image_dirs, batch_size=128, save_path=None):
         batch_embeddings = []
 
         for file_path in batch_files:
-            embedding = extract_embedding(file_path)
+            embedding = extract_embedding(file_path, tuning_status)
             batch_embeddings.append(embedding)
 
         embeddings.extend(batch_embeddings)
@@ -109,7 +112,7 @@ if __name__ == "__main__":
 
         print("=== 평균 임베딩 계산 시작 ===")
         mean_embedding = calculate_mean_embedding(
-            args.image_dir, save_path=args.embedding_file
+            args.image_dir, save_path=args.embedding_file, tuning_status=args.tuning,
         )
     except Exception as e:
         print(f"실행 중 오류 발생: {e}")

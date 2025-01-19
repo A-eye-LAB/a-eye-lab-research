@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import timm
+from copy import deepcopy
 
 class MobileNet_V3_Large(nn.Module):
     def __init__(self, num_classes, pretrained=False):
@@ -22,6 +23,9 @@ class MobileNet_V3_Large(nn.Module):
         for param in self.model.parameters():
             param.requires_grad = False
 
+        self.org_block5 = deepcopy(self.model.blocks[5])
+        self.org_block6 = deepcopy(self.model.blocks[6])
+
         for i in range(5, len(self.model.blocks)):
             for param in self.model.blocks[i].parameters():
                 param.requires_grad = True
@@ -38,6 +42,10 @@ class MobileNet_V3_Large(nn.Module):
     def forward(self, x):
         #features = self.model.forward_features(x)
         features, x = self.model(x)
+        features = self.org_block5(features)
+        features = self.org_block6(features)
+        features = self.global_pool(features)
+
         x = self.global_pool(x)
         x = self.conv_head(x)
         x = self.act2(x)

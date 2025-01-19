@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # Test Model
     #model = ViT_Large(num_classes=2, pretrained=False)
     model = MobileNet_V3_Large(num_classes=2, pretrained=False)
-    model_path = "/workspace/outputs/MobileNet_V3_Large_20250118_103143/weights/checkpoint_epoch_15.pt"
+    model_path = "/workspace/outputs/MobileNet_V3_Large_20250119_053236/weights/checkpoint_epoch_15.pt"
     model.load_state_dict(torch.load(model_path, map_location="cuda", weights_only=True))
     model.to("cuda")
     model.eval()

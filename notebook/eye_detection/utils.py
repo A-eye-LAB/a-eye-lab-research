@@ -11,7 +11,11 @@ from typing import Dict, List
 
 from torchvision import models
 from torchvision import transforms
-from models.mv3 import MobileNet_V3_Large
+#from models.mv3 import MobileNet_V3_Large
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__),"../../"))
+from train.models import MobileNet_V3_Large
 
 from scipy.spatial.distance import cosine
 
@@ -27,8 +31,8 @@ def load_model(tuning_status, model_path=""):
         model = models.mobilenet_v3_large(
             weights=models.MobileNet_V3_Large_Weights.IMAGENET1K_V1
         )
+        model.classifier = torch.nn.Identity()
 
-    model.classifier = torch.nn.Identity()
     model.eval()
 
     return model
@@ -68,17 +72,21 @@ def load_mean_embedding(file_path):
         return data
 
 
-def extract_embedding(model, image_path):
+def extract_embedding(model, image_path, tuning_status):
     """임베딩 추출 함수"""
 
     input_tensor = preprocess_image(image_path)
     with torch.no_grad():
-        embedding = model(input_tensor).squeeze().numpy()
+        if tuning_status:
+            embedding = model(input_tensor)[1].squeeze().numpy()
+        else:
+            embedding = model(input_tensor).squeeze().numpy()
+
 
     return embedding
 
 
-def is_eye_image(model, image_path, mean_embedding, threshold=0.65):
+def is_eye_image(model, image_path, mean_embedding, tuning_status, threshold=0.65):
     """이미지 유사성 판단 함수 (cosine similarity)
 
     Args :
@@ -92,7 +100,8 @@ def is_eye_image(model, image_path, mean_embedding, threshold=0.65):
         - similarity : similarity value.
     """
 
-    embedding = extract_embedding(model, image_path)
+    embedding = extract_embedding(model, image_path, tuning_status)
+    #print(f"{embedding.shape} {mean_embedding.shape}")
     similarity = 1 - cosine(embedding, mean_embedding)
 
     result = similarity > threshold
@@ -112,11 +121,11 @@ def evaluate_model(y_true: List[int], y_pred: List[int]) -> Dict[str, float]:
     specificity = torchmetrics.Specificity(task="binary")(y_pred, y_true)
 
     metrics = {
-        "valid/accuracy": accuracy.item(),
-        "valid/f1_score": f1_score.item(),
-        "valid/precision": precision.item(),
-        "valid/recall": recall.item(),
-        "valid/specificity": specificity.item(),
+        "accuracy": round(accuracy.item(),4),
+        "f1_score": round(f1_score.item(),4),
+        "precision": round(precision.item(),4),
+        "recall": round(recall.item(),4),
+        "specificity": round(specificity.item(),4),
     }
 
     return metrics
