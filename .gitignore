@@ -1,5 +1,10 @@
 dataset/data/
 tmp
+*.png
+*.jpg
+*.jpeg
+*.pkl
+*.onnx
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
