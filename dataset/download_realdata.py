@@ -47,7 +47,6 @@ for i in body:
     if i['content_type'] == 'image/jpeg':
         images.append(i)
 
-print
 # collection 데이터 다운로드
 for image in images:
     url = f'https://objectstorage.kr-central-2.kakaocloud.com/v1/{project_id}/data-collect/{image["name"]}'
