@@ -2,6 +2,7 @@ dataset/data/
 tmp
 *.png
 *.jpg
+*.JPG
 *.jpeg
 *.pkl
 *.onnx

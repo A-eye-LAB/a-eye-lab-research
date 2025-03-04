@@ -117,7 +117,7 @@ class Trainer:
 
             with autocast(enabled=self.config["TRAIN"]["AMP"], device_type=self.device.type):
                 output = self.model(data)
-                loss = self.criterion(output[0], target)
+                loss = self.criterion(output, target)
 
             # Grad Scale
             self.scaler.scale(loss).backward()
@@ -175,10 +175,10 @@ class Trainer:
 
             with autocast(enabled=self.config["TRAIN"]["AMP"], device_type=self.device.type):
                 output = self.model(data)
-                loss = self.criterion(output[0], target)
+                loss = self.criterion(output, target)
 
             total_loss += loss.item()
-            _, predicted = torch.max(output[0], 1)
+            _, predicted = torch.max(output, 1)
 
             y_true.extend(target.cpu().numpy())
             y_pred.extend(predicted.cpu().numpy())

@@ -6,7 +6,6 @@ from torch.amp import GradScaler
 # Model Imports
 import models
 import torchvision.models as torchvision_models
-# from models.efficient import EfficientNet
 
 
 # Module Imports
@@ -29,13 +28,7 @@ setup_cudnn()
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--cfg", type=str, required=True, help="Configuration file to use")
-
-    parser.add_argument(
-        "--resume",
-        action="store_true",
-        help="Resume training",
-    )
-
+    parser.add_argument("--resume", action="store_true", help="Resume training")
     args = parser.parse_args()
 
     return args
@@ -43,10 +36,10 @@ def parse_args():
 
 def load_model(model_name, num_classes, pretrained):
     if hasattr(models, model_name):
-        model = getattr(models, model_name)(num_classes=num_classes, pretrained=pretrained)
+        return getattr(models, model_name)(num_classes=num_classes, pretrained=pretrained)
     else:
-        model = getattr(torchvision_models, model_name)(num_classes=num_classes, pretrained=pretrained)
-    return model
+        return getattr(torchvision_models, model_name)(num_classes=num_classes, pretrained=pretrained)
+
 
 def main(cfg, resume=False):
     device = torch.device(cfg['DEVICE'])
@@ -54,21 +47,17 @@ def main(cfg, resume=False):
     GROUP_NAME = "experiment-" + wandb.util.generate_id()
 
     for fold_idx in range(cfg["DATASET"]["N_FOLDS"]):
-        # WandB Init
         wandb.init(
             project=cfg["WANDB_PROJECT"],
             name=f"fold-{fold_idx}",
-            group=GROUP_NAME,  # 그룹으로 모든 폴드를 묶음
+            group=GROUP_NAME, 
             job_type="train",
             config=cfg,
             reinit=True,
         )
 
         train_set, val_set = CombinedDataset(
-            cfg["DATASET"]["TRAIN_DATA_DIR"],
-            n_folds=cfg["DATASET"]["N_FOLDS"],
-            fold_idx=fold_idx,
-            random_seed=cfg["RANDOM_SEED"],
+            cfg["DATASET"]["TRAIN_DATA_DIR"]
         )
 
         train_loader = DataLoader(
@@ -84,20 +73,12 @@ def main(cfg, resume=False):
             batch_size=cfg["TRAIN"]["BATCH_SIZE"],
             num_workers=cfg["DATASET"]["NUM_WORKERS"],
             shuffle=False,
-
             pin_memory=True,
         )
 
-        # Model Set
-        # model = EfficientNet(
-        #     num_classes=cfg["MODEL"]["NUM_CLASSES"],
-        #     pretrained=cfg["MODEL"]["PRETRAINED"],
-        # )
         model = load_model(cfg["MODEL"]["NAME"], cfg["MODEL"]["NUM_CLASSES"], cfg["MODEL"]["PRETRAINED"])
         model = model.to(device)
-
-        # Loss Function & Optimizer Set
-        criterion = get_loss(cfg["LOSS"]["NAME"])
+        criterion = get_loss(cfg["LOSS"]["NAME"], label_smoothing=0.1)  # 레이블 스무딩 적용
         optimizer = get_optimizer(model, cfg["OPTIMIZER"])
         scheduler = get_scheduler(optimizer, **cfg["SCHEDULER"])
         scaler = GradScaler()

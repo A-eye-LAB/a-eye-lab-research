@@ -118,7 +118,7 @@ class ImageTestEvaluator:
             for data, label in tqdm(self.dataloader, desc='Evaluationg', unit='batch'):
                 data = data.to(self.device)
 
-                output = self.model(data)[0]
+                output = self.model(data)
                 preds = torch.argmax(output, dim=1).cpu().numpy()
                 all_preds.extend(preds)
                 all_labels.extend(label.cpu().numpy())
@@ -146,16 +146,17 @@ if __name__ == "__main__":
     from train.models import *
 
     # Test Model
-    #model = ViT_Large(num_classes=2, pretrained=False)
-    model = MobileNet_V3_Large(num_classes=2, pretrained=False)
-    model_path = "/workspace/outputs/MobileNet_V3_Large_20250119_053236/weights/checkpoint_epoch_15.pt"
+    model = ViT_Large(num_classes=2, pretrained=False)
+    # model = MobileNet_V3_Large(num_classes=2, pretrained=False)
+    # model_path = "/workspace/outputs/MobileNet_V3_Large_20250303_120756/weights/checkpoint_epoch_7.pt"
+    model_path = "/workspace/outputs/ViT_Large_20250303_151036/weights/checkpoint_epoch_17.pt"
     model.load_state_dict(torch.load(model_path, map_location="cuda", weights_only=True))
     model.to("cuda")
     model.eval()
 
 
     ###########
-    dataset_path = "/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_nand"
+    dataset_path = "/workspace/a-eye-lab-research/dataset/real_data"
     evaluator = ImageTestEvaluator(model, dataset_path, image_size=(224, 224), device="cuda")
 
     evaluator.load_data()

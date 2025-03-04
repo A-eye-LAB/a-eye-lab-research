@@ -34,13 +34,20 @@ class CombinedDataset:
             'std': (0.229, 0.224, 0.225)
         }
         self.transform_train = transforms.Compose([
-            #transforms.Resize((224, 224)),
             transforms.Resize(224),
-            transforms.CenterCrop((224,224)),
-            #transforms.RandomHorizontalFlip(p=0.5),
-            #transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
+            transforms.RandomCrop(224),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.5),
+            transforms.RandomRotation(degrees=15),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+            transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+            transforms.RandomGrayscale(p=0.1),
+            transforms.RandomPerspective(distortion_scale=0.2, p=0.5),
+            transforms.RandomAutocontrast(p=0.3),
+            transforms.RandomEqualize(p=0.3),
             transforms.ToTensor(),
             transforms.Normalize(**self.norm),
+            transforms.RandomErasing(p=0.3)
         ])
         self.transform_val = transforms.Compose([
             #transforms.Resize((224, 224)),

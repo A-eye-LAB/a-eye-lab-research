@@ -18,7 +18,7 @@ DATASET:
     # "/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_nand"
   ]
   NUM_WORKERS   : 16
-  N_FOLDS       : 5
+  N_FOLDS       : 1
 
 TRAIN: 
   BATCH_SIZE    : 128    

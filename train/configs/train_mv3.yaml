@@ -13,7 +13,6 @@ DATASET:
     "/workspace/a-eye-lab-research/dataset/data/C003",
     "/workspace/a-eye-lab-research/dataset/data/Cataract_Detection-using-CNN",
     "/workspace/a-eye-lab-research/dataset/data/Cataract-Detection-and-Classification",
-    #"/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_aksh",     # salt & pepper
     "/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_kersh",
     #"/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_nand"      # Extern set
   ]
@@ -22,8 +21,8 @@ DATASET:
 
 TRAIN: 
   BATCH_SIZE    : 128    
-  EPOCHS        : 16      
-  PATIENCE      : 0                   # early stop X
+  EPOCHS        : 100
+  PATIENCE      : 10                   # early stop X
   AMP           : True   
 
 LOSS:
@@ -31,7 +30,7 @@ LOSS:
 
 OPTIMIZER:
   NAME: AdamW
-  lr: 5.0e-4
+  lr: 0.0001
   weight_decay: 0.1
 
 SCHEDULER:
