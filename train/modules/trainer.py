@@ -33,6 +33,7 @@ class Trainer:
             fold_idx: int,                               # 폴드 인덱스
             train_loader: DataLoader,                   # 훈련 데이터 로더
             valid_loader: Optional[DataLoader] = None,  # 검증 데이터 로더 (옵션)
+            test_loader: Optional[DataLoader] = None,   # 테스트 데이터 로더 (옵션)
             resume: bool = False,
         ) -> None:
 
@@ -47,6 +48,7 @@ class Trainer:
         self.checkpoint_dir = checkpoint_dir
         self.train_loader = train_loader
         self.valid_loader = valid_loader
+        self.test_loader = test_loader
         self.fold_idx = fold_idx
         self.model_dir = self.checkpoint_dir / 'weights'
         self.model_dir.mkdir(parents=True, exist_ok=True)
@@ -117,7 +119,7 @@ class Trainer:
 
             with autocast(enabled=self.config["TRAIN"]["AMP"], device_type=self.device.type):
                 output = self.model(data)
-                loss = self.criterion(output[0], target)
+                loss = self.criterion(output, target)
 
             # Grad Scale
             self.scaler.scale(loss).backward()
@@ -133,6 +135,10 @@ class Trainer:
         valid_loss, val_metrics = self._valid_epoch()
         print_evaluation("validate", epoch, valid_loss, val_metrics)
 
+        # Test 단계 실행
+        test_loss, test_metrics = self.test_epoch()
+        print_evaluation("test", epoch, test_loss, test_metrics)
+
         self.wandb.log({
             "fold_idx": self.fold_idx,
             "epoch": epoch,
@@ -146,7 +152,7 @@ class Trainer:
 
         if early_stopping is not None:
             # Early Stopping 체크
-            early_stopping(valid_loss, self.model, path=checkpoint_path)
+            early_stopping(test_loss, self.model, path=checkpoint_path)
             if early_stopping.early_stop:
                 return False
         else:
@@ -158,7 +164,7 @@ class Trainer:
             if epoch != 0:
                 os.remove(self.model_dir/f'checkpoint_epoch_{epoch-1}.pt')
 
-        self.scheduler.step(valid_loss)
+        self.scheduler.step()
 
         return True
 
@@ -175,10 +181,10 @@ class Trainer:
 
             with autocast(enabled=self.config["TRAIN"]["AMP"], device_type=self.device.type):
                 output = self.model(data)
-                loss = self.criterion(output[0], target)
+                loss = self.criterion(output, target)
 
             total_loss += loss.item()
-            _, predicted = torch.max(output[0], 1)
+            _, predicted = torch.max(output, 1)
 
             y_true.extend(target.cpu().numpy())
             y_pred.extend(predicted.cpu().numpy())
@@ -187,4 +193,29 @@ class Trainer:
         metrics = evaluate_model(y_true, y_pred, self.config)
 
         return valid_loss, metrics
+    
+    @torch.no_grad()
+    def test_epoch(self) -> Tuple[float, Dict[str, float]]:
+        self.model.eval()
+        total_loss = 0.0
+        y_true = []
+        y_pred = []
 
+        for data, target in tqdm(self.test_loader, desc="test", leave=False):
+            data = data.to(self.device, non_blocking=True)
+            target = target.to(self.device, non_blocking=True)
+
+            with autocast(enabled=self.config["TRAIN"]["AMP"], device_type=self.device.type):
+                output = self.model(data)
+                loss = self.criterion(output, target)
+
+            total_loss += loss.item()
+            _, predicted = torch.max(output, 1)
+
+            y_true.extend(target.cpu().numpy())
+            y_pred.extend(predicted.cpu().numpy())
+
+        test_loss = total_loss / len(self.test_loader)
+        metrics = evaluate_model(y_true, y_pred, self.config)
+
+        return test_loss, metrics

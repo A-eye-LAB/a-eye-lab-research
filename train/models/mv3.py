@@ -6,38 +6,38 @@ from copy import deepcopy
 class MobileNet_V3_Large(nn.Module):
     def __init__(self, num_classes, pretrained=False):
         super(MobileNet_V3_Large, self).__init__()
+        self.drop_rate = 0.4
 
         # From timm
         self.model = timm.create_model(
             'mobilenetv3_large_100.miil_in21k_ft_in1k',
             pretrained = pretrained,
-            features_only = True,
-            out_indices = [3, 4],
+            drop_path_rate=self.drop_rate
         )
-        self.global_pool = nn.AdaptiveAvgPool2d(1)
-        self.conv_head = nn.Conv2d(960, 1280, kernel_size=1, stride=1)
-        self.act2 = nn.Hardswish()
-        self.flatten = nn.Flatten(start_dim=1)
-        self.classifier = nn.Linear(1280, num_classes)
-
+        
+        # 모든 파라미터를 freeze
         for param in self.model.parameters():
             param.requires_grad = False
-
-        self.org_block5 = deepcopy(self.model.blocks[5])
-        self.org_block6 = deepcopy(self.model.blocks[6])
-
-        for i in range(5, len(self.model.blocks)):
-            for param in self.model.blocks[i].parameters():
-                param.requires_grad = True
-        #for param in self.model.blocks[0:]:
-        #for param in self.model.blocks[5:]:   
-            #param.requires_grad = True
-        #self.model.conv_head.weight.requires_grad = True
-        #self.model.conv_head.bias.requires_grad = True
-
-        # For timm version
-        #in_features = self.model.classifier.in_features
-        #self.model.classifier = nn.Linear(in_features=in_features, out_features=num_classes)
+            
+        # 마지막 두 개의 블록만 학습하도록 설정
+        for name, param in self.model.blocks[-2:].named_parameters():
+            param.requires_grad = True
+            
+        
+        # 분류 헤드 수정
+        in_features = self.model.classifier.in_features
+        self.model.classifier = nn.Sequential(
+            nn.Linear(in_features, 2048),
+            nn.ReLU(),
+            nn.Dropout(p=self.drop_rate),
+            nn.Linear(2048, 1024),
+            nn.ReLU(),
+            nn.Dropout(p=self.drop_rate),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Dropout(p=self.drop_rate),
+            nn.Linear(512, num_classes)
+        )
 
     def forward(self, x):
         #features = self.model.forward_features(x)

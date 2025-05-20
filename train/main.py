@@ -11,7 +11,7 @@ import torchvision.models as torchvision_models
 
 # Module Imports
 from modules.trainer import Trainer
-from modules.datasets import CombinedDataset
+from modules.datasets import CombinedDataset, CustomImageDataset
 from modules.losses import get_loss
 from modules.optimizers import get_optimizer
 from modules.schedulers import get_scheduler
@@ -71,6 +71,8 @@ def main(cfg, resume=False):
             random_seed=cfg["RANDOM_SEED"],
         )
 
+        test_set = CustomImageDataset(cfg["DATASET"]["TEST_DATA_DIR"])
+
         train_loader = DataLoader(
             train_set,
             batch_size=cfg["TRAIN"]["BATCH_SIZE"],
@@ -88,11 +90,14 @@ def main(cfg, resume=False):
             pin_memory=True,
         )
 
-        # Model Set
-        # model = EfficientNet(
-        #     num_classes=cfg["MODEL"]["NUM_CLASSES"],
-        #     pretrained=cfg["MODEL"]["PRETRAINED"],
-        # )
+        test_loader = DataLoader(
+            test_set,
+            batch_size=cfg["TRAIN"]["BATCH_SIZE"],
+            num_workers=cfg["DATASET"]["NUM_WORKERS"],
+            shuffle=False,
+            pin_memory=True,
+        )
+
         model = load_model(cfg["MODEL"]["NAME"], cfg["MODEL"]["NUM_CLASSES"], cfg["MODEL"]["PRETRAINED"])
         model = model.to(device)
 
@@ -117,6 +122,7 @@ def main(cfg, resume=False):
             fold_idx=fold_idx,
             train_loader=train_loader,
             valid_loader=valid_loader,
+            test_loader=test_loader,
             resume=resume,
         )
 

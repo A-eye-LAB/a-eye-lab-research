@@ -33,19 +33,22 @@ class CombinedDataset:
             'mean': (0.485, 0.456, 0.406),
             'std': (0.229, 0.224, 0.225)
         }
+        
+        # ✅ RandAugment 추가
         self.transform_train = transforms.Compose([
-            #transforms.Resize((224, 224)),
-            transforms.Resize(224),
-            transforms.CenterCrop((224,224)),
-            #transforms.RandomHorizontalFlip(p=0.5),
-            #transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
+            transforms.Resize(256),  # 더 작은 크기로 리사이즈
+            transforms.RandomCrop(224),  # 224로 크롭
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.3),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2),
             transforms.ToTensor(),
             transforms.Normalize(**self.norm),
         ])
+
+        
         self.transform_val = transforms.Compose([
-            #transforms.Resize((224, 224)),
-            transforms.Resize(224),
-            transforms.CenterCrop((224,224)),
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize(**self.norm),
         ])
@@ -53,7 +56,6 @@ class CombinedDataset:
         self.combined_train_dataset, self.combined_val_dataset = self.process_datasets()
 
     def create_dataset(self, root_dir: str) -> Dataset:
-        #return datasets.ImageFolder(root=root_dir, transform=self.transform, allow_empty=True)
         return datasets.ImageFolder(root=root_dir, allow_empty=True)
 
     def process_datasets(self) -> Tuple[Dataset, Dataset]:
@@ -93,7 +95,7 @@ class CombinedDataset:
         targets = dataset.targets
         indices = list(range(len(targets)))
         
-        if n_folds==1:
+        if n_folds == 1:
             train_idx, val_idx = train_test_split(
                                     np.arange(len(targets)),
                                     test_size=0.2,
@@ -106,10 +108,8 @@ class CombinedDataset:
             return train_dataset, val_dataset
         
         else:
-            # StratifiedKFold 사용
             skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=random_seed)
         
-            # 현재 fold_idx에 해당하는 분할 찾기
             for i, (train_idx, val_idx) in enumerate(skf.split(indices, targets)):
                 if i == fold_idx:
                     train_dataset = Subset(dataset, train_idx)
@@ -150,6 +150,36 @@ class CombinedDataset:
     def __iter__(self):
         yield self.combined_train_dataset
         yield self.combined_val_dataset
+
+import torchvision
+class CustomImageDataset(Dataset):
+    def __init__(self, dataset_path):
+        """
+        커스텀 데이터셋 클래스 (이미지와 레이블을 로드)
+        """
+
+        self.norm = {
+            'mean': (0.485, 0.456, 0.406),
+            'std': (0.229, 0.224, 0.225)
+        }
+
+        # Image transformation
+        self.transform = transforms.Compose([
+            transforms.Resize(256),  # 더 큰 크기로 리사이즈
+            transforms.CenterCrop(224),  # 최종 크기 384로 크롭
+            transforms.ToTensor(),
+            transforms.Normalize(**self.norm),
+        ])
+        self.dataset = torchvision.datasets.ImageFolder(
+            root=dataset_path,
+            transform=self.transform
+        )
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        return self.dataset[idx]
 
 if __name__ == '__main__':
     import utils

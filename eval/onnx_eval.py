@@ -151,7 +151,7 @@ class ONNXImageTestEvaluator:
         # ROC 커브 계산
         fpr, tpr, _ = roc_curve(y_true, y_prob)
         roc_auc = auc(fpr, tpr)
-
+        print(f"AUC-ROC: {roc_auc:.2f}")
         # ROC 커브 그리기
         plt.figure(figsize=(8, 6))
         plt.plot(fpr, tpr, color='darkorange', lw=2, 
@@ -183,8 +183,8 @@ class ONNXImageTestEvaluator:
 
 if __name__ == "__main__":
     # ONNX 모델 경로
-    onnx_path = "/workspace/model_quantized.onnx"
-    dataset_path = "/workspace/a-eye-lab-research/dataset/data/kaggle_cataract_nand"
+    onnx_path = "/workspace/model_fastvit.onnx"
+    dataset_path = "/workspace/a-eye-lab-research/dataset/real_data"
     
     # ONNX 평가기 초기화
     evaluator = ONNXImageTestEvaluator(
