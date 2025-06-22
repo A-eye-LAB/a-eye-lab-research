@@ -9,9 +9,9 @@ def main(dataset_path, model_path):
     dataloader = DataLoader(dataset, batch_size=16, shuffle=False, num_workers=16)
 
     if model_path.endswith('.pt'):
-        y_pred, y_true = pytorch_predict(model_path, dataloader)
+        y_true, y_pred = pytorch_predict(model_path, dataloader)
     elif model_path.endswith('.onnx'):
-        y_pred, y_true = onnx_predict(model_path, dataloader)
+        y_true, y_pred = onnx_predict(model_path, dataloader)
     else:
         raise ValueError("지원하지 않는 모델 형식입니다. .pt 또는 .onnx 파일을 사용해주세요.")
 

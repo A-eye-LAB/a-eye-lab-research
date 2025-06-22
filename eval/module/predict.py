@@ -27,7 +27,7 @@ def onnx_predict(model_path, dataloader):
         all_preds.extend(preds)
         all_labels.extend(label.numpy())
 
-    return all_preds, all_labels
+    return all_labels, all_preds
 
 def pytorch_predict(model_path, dataloader):
 
@@ -48,4 +48,4 @@ def pytorch_predict(model_path, dataloader):
             all_preds.extend(preds)
             all_labels.extend(label.cpu().numpy())
 
-    return all_preds, all_labels
+    return all_labels, all_preds
