@@ -72,11 +72,14 @@ class YOLOWithNMS(nn.Module):
         y1 = center_y - crop_size / 2
         y2 = center_y + crop_size / 2
 
-        # clamp boundary
-        x1 = torch.clamp(x1, min=0)
-        y1 = torch.clamp(y1, min=0)
-        x2 = torch.clamp(x2, max=img_width)
-        y2 = torch.clamp(y2, max=img_height)
+        x_shift = torch.clamp(-x1, min=0.0) - torch.clamp(x2 - img_width, min=0.0)
+        y_shift = torch.clamp(-y1, min=0.0) - torch.clamp(y2 - img_height, min=0.0)
+
+        # 조정된 좌표 계산 및 클램핑
+        x1 = torch.clamp(x1 + x_shift, 0, img_width)
+        y1 = torch.clamp(y1 + y_shift, 0, img_height)
+        x2 = torch.clamp(x2 + x_shift, 0, img_width)
+        y2 = torch.clamp(y2 + y_shift, 0, img_height)
 
         crops = torch.stack([x1, y1, x2, y2], dim=1)  # (N,4)
         return crops
@@ -122,5 +125,5 @@ def export_onnx(image_path, model_path="iris.pt", output_path="iris_nms.onnx"):
 
 
 if __name__ == "__main__":
-    image_path = "/home/yujin/a-eye-lab/yolo/onnx/testset/one_eye.jpg"
+    image_path = "../assets/test.jpeg"
     export_onnx(image_path, "iris.pt", "iris_nms.onnx")
