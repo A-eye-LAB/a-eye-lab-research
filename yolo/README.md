@@ -1,4 +1,4 @@
-# Yolov8 을 이용한 Iris detection
+# Yolov11 을 이용한 Iris detection
 
 ## Setup
 원하는 환경 셋팅
