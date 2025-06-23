@@ -152,7 +152,7 @@ class Trainer:
 
         if early_stopping is not None:
             # Early Stopping 체크
-            early_stopping(test_loss, self.model, path=checkpoint_path)
+            early_stopping(valid_loss, self.model, path=checkpoint_path)
             if early_stopping.early_stop:
                 return False
         else:
