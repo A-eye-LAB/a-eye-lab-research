@@ -1,35 +1,32 @@
 from ultralytics import YOLO
+import yaml
+import os
 import torch
-import argparse
 
-def args_parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, default='data.yaml')
-    parser.add_argument('--epochs', type=int, default=100)
-    parser.add_argument('--batch', type=int, default=64)
-    parser.add_argument('--patience', type=int, default=20)
-    parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--workers', type=int, default=16)
-    return parser.parse_args()
 
-def train_yolo(cfg):
+def train_yolo():
     # Check if CUDA is available
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print(f"Using device: {device}")
 
     # Try to load the model
-    model = YOLO('yolov8m.pt')
+    model = YOLO('yolo11s.pt')
 
+    # Load dataset configuration
+    with open('dataset.yaml', 'r') as f:
+        data_config = yaml.safe_load(f)
+
+    # Training arguments
     args = {
-        'data': cfg.config,          # path to data config file
-        'epochs': cfg.epochs,                   # number of epochs
+        'data': 'dataset.yaml',          # path to data config file
+        'epochs': 500,                   # number of epochs
         'imgsz': 640,                    # image size
-        'batch': cfg.batch,                     # batch size
-        'patience': cfg.patience,                  # early stopping patience
+        'batch': 16,                     # batch size
+        'patience': 50,                  # early stopping patience
         'device': device,                # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        'workers': cfg.workers,                    # number of worker threads
-        'project': 'runs',         # save to project/name
-        'name': 'image',                   # save to project/name
+        'workers': 8,                    # number of worker threads
+        'project': 'runs/train',         # save to project/name
+        'name': 'image_2310_yolov11s',                   # save to project/name
         'exist_ok': False,               # existing project/name ok, do not increment
         'pretrained': True,              # use pretrained model
         'optimizer': 'auto',             # optimizer (SGD, Adam, etc.)
@@ -48,5 +45,4 @@ def train_yolo(cfg):
     print("Training completed! Model saved as 'best.pt'")
 
 if __name__ == '__main__':
-    args = args_parser()
-    train_yolo(args)
+    train_yolo()
