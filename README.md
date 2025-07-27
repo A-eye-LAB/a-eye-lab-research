@@ -20,6 +20,12 @@ a-eye-lab-research/
 # 프로젝트 루트 디렉토리로 이동
 cd a-eye-lab-research/docs
 
+# (선택) conda 환경 생성
+conda create -n aeye-lab python=3.9
+conda activate aeye-lab
+
+conda install pytorch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 pytorch-cuda=12.1 -c pytorch -c nvidia
+
 # 필요한 패키지 설치 (requirements.txt가 있다면)
 pip install -r requirements.txt
 ```
