@@ -1,17 +1,16 @@
 # Torch Imports
 import torch
 from torch.utils.data import DataLoader
-from torch.amp import GradScaler
+from torch.amp.grad_scaler import GradScaler
+from torch.utils.data import random_split
 
 # Model Imports
 import models
 import torchvision.models as torchvision_models
-# from models.efficient import EfficientNet
-
 
 # Module Imports
 from modules.trainer import Trainer
-from modules.datasets import CombinedDataset, CustomImageDataset
+from modules.datasets import MultiFolderDataset
 from modules.losses import get_loss
 from modules.optimizers import get_optimizer
 from modules.schedulers import get_scheduler
@@ -30,12 +29,6 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--cfg", type=str, required=True, help="Configuration file to use")
 
-    parser.add_argument(
-        "--resume",
-        action="store_true",
-        help="Resume training",
-    )
-
     args = parser.parse_args()
 
     return args
@@ -48,86 +41,71 @@ def load_model(model_name, num_classes, pretrained):
         model = getattr(torchvision_models, model_name)(num_classes=num_classes, pretrained=pretrained)
     return model
 
-def main(cfg, resume=False):
+def main(cfg):
     device = torch.device(cfg['DEVICE'])
 
-    GROUP_NAME = "experiment-" + wandb.util.generate_id()
+    wandb.init(
+        project=cfg["WANDB_PROJECT"],
+        job_type="train",
+        config=cfg
+    )
 
-    for fold_idx in range(cfg["DATASET"]["N_FOLDS"]):
-        # WandB Init
-        wandb.init(
-            project=cfg["WANDB_PROJECT"],
-            name=f"fold-{fold_idx}",
-            group=GROUP_NAME,  # 그룹으로 모든 폴드를 묶음
-            job_type="train",
-            config=cfg,
-            reinit=True,
-        )
+    dataset = MultiFolderDataset(cfg["DATASET"]["TRAIN_DATA_DIR"])
 
-        train_set, val_set = CombinedDataset(
-            cfg["DATASET"]["TRAIN_DATA_DIR"],
-            n_folds=cfg["DATASET"]["N_FOLDS"],
-            fold_idx=fold_idx,
-            random_seed=cfg["RANDOM_SEED"],
-        )
+    # 전체 길이에서 80% 학습, 20% 검증 분할
+    total_size = len(dataset)
+    train_size = int(cfg["DATASET"]["RATIO"] * total_size)
+    val_size = total_size - train_size
 
-        test_set = CustomImageDataset(cfg["DATASET"]["TEST_DATA_DIR"])
+    train_set, val_set = random_split(dataset, [train_size, val_size])
 
-        train_loader = DataLoader(
-            train_set,
-            batch_size=cfg["TRAIN"]["BATCH_SIZE"],
-            num_workers=cfg["DATASET"]["NUM_WORKERS"],
-            shuffle=True,
-            pin_memory=True
-        )
+    train_loader = DataLoader(
+        train_set,
+        batch_size=cfg["TRAIN"]["BATCH_SIZE"],
+        num_workers=cfg["DATASET"]["NUM_WORKERS"],
+        shuffle=True,
+        pin_memory=True
+    )
 
-        valid_loader = DataLoader(
-            val_set,
-            batch_size=cfg["TRAIN"]["BATCH_SIZE"],
-            num_workers=cfg["DATASET"]["NUM_WORKERS"],
-            shuffle=False,
+    valid_loader = DataLoader(
+        val_set,
+        batch_size=cfg["TRAIN"]["BATCH_SIZE"],
+        num_workers=cfg["DATASET"]["NUM_WORKERS"],
+        shuffle=False,
 
-            pin_memory=True,
-        )
+        pin_memory=True,
+    )
 
-        test_loader = DataLoader(
-            test_set,
-            batch_size=cfg["TRAIN"]["BATCH_SIZE"],
-            num_workers=cfg["DATASET"]["NUM_WORKERS"],
-            shuffle=False,
-            pin_memory=True,
-        )
+    model = load_model(
+        cfg["MODEL"]["NAME"], 
+        cfg["MODEL"]["NUM_CLASSES"], 
+        cfg["MODEL"]["PRETRAINED"]
+    )
+    model = model.to(device)
 
-        model = load_model(cfg["MODEL"]["NAME"], cfg["MODEL"]["NUM_CLASSES"], cfg["MODEL"]["PRETRAINED"])
-        model = model.to(device)
+    # Loss Function & Optimizer Set
+    criterion = get_loss(cfg["LOSS"]["NAME"])
+    optimizer = get_optimizer(model, cfg["OPTIMIZER"])
+    scheduler = get_scheduler(optimizer, **cfg["SCHEDULER"])
+    scaler = GradScaler()
 
-        # Loss Function & Optimizer Set
-        criterion = get_loss(cfg["LOSS"]["NAME"])
-        optimizer = get_optimizer(model, cfg["OPTIMIZER"])
-        scheduler = get_scheduler(optimizer, **cfg["SCHEDULER"])
-        scaler = GradScaler()
+    save_dir, name = dir_set(cfg["SAVE_DIR"], model)
 
-        save_dir, name = dir_set(cfg["SAVE_DIR"], model)
+    trainer = Trainer(
+        model=model,
+        criterion=criterion,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        scaler=scaler,
+        config=cfg,
+        device=device,
+        wandb=wandb,
+        checkpoint_dir=str(save_dir),
+        train_loader=train_loader,
+        valid_loader=valid_loader,
+    )
 
-        trainer = Trainer(
-            model=model,
-            criterion=criterion,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            scaler=scaler,
-            config=cfg,
-            device=device,
-            wandb=wandb,
-            checkpoint_dir=save_dir,
-            fold_idx=fold_idx,
-            train_loader=train_loader,
-            valid_loader=valid_loader,
-            test_loader=test_loader,
-            resume=resume,
-        )
-
-        trainer.train()
-        wandb.run.finish()
+    trainer.train()
 
     wandb.finish()
 
@@ -136,4 +114,4 @@ if __name__ == "__main__":
     args = parse_args()
     cfg = load_yaml(args.cfg)
 
-    main(cfg, args.resume)
+    main(cfg)
