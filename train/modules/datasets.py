@@ -27,7 +27,7 @@ class MultiFolderDataset(Dataset):
                 if not os.path.isdir(class_dir):
                     continue
                 for fname in os.listdir(class_dir):
-                    if fname.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    if fname.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
                         img_path = os.path.join(class_dir, fname)
                         label = self.class_to_idx[class_name]
                         self.samples.append((img_path, label))

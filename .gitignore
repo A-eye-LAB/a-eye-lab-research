@@ -4,7 +4,8 @@ tmp
 *.jpg
 *.jpeg
 *.pkl
-*.onnx
+*.webp
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
