@@ -26,6 +26,6 @@ def main(dataset_path, model_path):
 
 if __name__ == "__main__":
     main(
-        dataset_path="/workspace/a-eye-lab-research/real_data",
-        model_path="/workspace/model_fastvit.onnx"
+        dataset_path="../dataset/catascan_data/test",
+        model_path="../weights/model_fastvit.onnx"
     )

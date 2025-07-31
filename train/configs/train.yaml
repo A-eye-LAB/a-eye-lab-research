@@ -8,20 +8,16 @@ MODEL:
 
 DATASET:
   TRAIN_DATA_DIR: [
-    "/workspace/a-eye-lab-research/crop/cropted",
-    "/workspace/a-eye-lab-research/crop/cropted_DIRL",
-    "/workspace/a-eye-lab-research/crop/cropted_eval",
-    "/workspace/a-eye-lab-research/crop/cropted_real",
-    "/workspace/a-eye-lab-research/crop/cropted_UBIPr"
+    "../dataset/catascan_data/train"
   ]
   NUM_WORKERS   : 16
   RATIO         : 0.8
 
-TRAIN: 
-  BATCH_SIZE    : 64    
-  EPOCHS        : 100    
-  PATIENCE      : 20     
-  AMP           : True   
+TRAIN:
+  BATCH_SIZE    : 64
+  EPOCHS        : 100
+  PATIENCE      : 20
+  AMP           : True
 
 LOSS:
   NAME: CrossEntropyLoss
@@ -38,6 +34,6 @@ SCHEDULER:
   patience: 5
   min_lr: 0.000001
 
-SAVE_DIR        : '/workspace/outputs'
+SAVE_DIR        : 'outputs'
 
 WANDB_PROJECT   : "cataract-detection"

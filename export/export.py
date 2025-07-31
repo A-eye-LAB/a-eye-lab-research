@@ -10,7 +10,7 @@ def export_to_onnx(model, input_shape, save_path):
     """PyTorch 모델을 ONNX로 변환"""
     model.eval()
     dummy_input = torch.randn(input_shape).cuda()
-    
+
     torch.onnx.export(
         model,
         dummy_input,
@@ -44,20 +44,20 @@ def verify_onnx_model(onnx_path):
 
 if __name__ == "__main__":
     # 사용 예시
-    model_path = "/workspace/outputs/FastViT_20250407_092255/weights/checkpoint_epoch_67.pt"
+    model_path = "../weights/fastvit.pt"
     model = FastViT(num_classes=2, pretrained=False)  # 여기에 실제 PyTorch 모델을 넣으세요
     model.load_state_dict(torch.load(model_path, map_location="cuda", weights_only=True))
     model.to("cuda")
     model.eval()
     input_shape = (1, 3, 224, 224)  # 예시 입력 shape
-    
+
     # ONNX 변환
     onnx_path = "./model_fastvit.onnx"
     export_to_onnx(model, input_shape, onnx_path)
-    
+
     # 모델 검증
     verify_onnx_model(onnx_path)
-    
+
     # 양자화
     quantized_path = "./model_fastvit_quantized.onnx"
     quantize_onnx_model(onnx_path, quantized_path)
