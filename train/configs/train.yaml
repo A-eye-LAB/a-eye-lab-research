@@ -8,15 +8,15 @@ MODEL:
 
 DATASET:
   TRAIN_DATA_DIR: [
-    "../dataset/catascan_data/train"
+    "../dataset/final/train"
   ]
   NUM_WORKERS   : 16
-  RATIO         : 0.8
+  RATIO         : 0.85
 
 TRAIN:
   BATCH_SIZE    : 64
-  EPOCHS        : 100
-  PATIENCE      : 20
+  EPOCHS        : 200
+  PATIENCE      : 30
   AMP           : True
 
 LOSS:
@@ -24,7 +24,7 @@ LOSS:
 
 OPTIMIZER:
   NAME: AdamW
-  lr: 0.0001
+  lr: 0.0002
   weight_decay: 0.0001
 
 SCHEDULER:

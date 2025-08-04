@@ -9,7 +9,7 @@ class FastViT(nn.Module):
         
         # timm을 사용해 FastViT 모델을 불러옵니다
         self.model = timm.create_model(
-            'fastvit_t8', # 기본 모델인 T8 사용 
+            'fastvit_ma36.apple_dist_in1k', # 기본 모델인 T8 사용 
             pretrained=pretrained,
             drop_path_rate=self.drop_rate,
             num_classes=num_classes
