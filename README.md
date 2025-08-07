@@ -30,6 +30,11 @@ conda install pytorch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 pytorch-cuda=
 pip install -r requirements.txt
 ```
 
+## 📊 학습 데이터 다운로드
+```bash
+https://huggingface.co/a-eyelab
+```
+
 ## 🏷️ 학습 데이터 설정 방법 및 학습 파라미터 설정
 모델 학습 시에 학습 데이터 설정은 config/train.yaml에서 아래의 항목처럼 기재하시면 됩니다.
 
