@@ -4,7 +4,6 @@
 
 ```bash
 a-eye-lab-research/
-├── docker/          # Docker 관련 설정 및 코드
 ├── dataset/         # 데이터셋 처리 및 관리 코드
 ├── train/           # 모델 학습 관련 코드
 ├── eval/            # 모델 평가 및 검증 코드
