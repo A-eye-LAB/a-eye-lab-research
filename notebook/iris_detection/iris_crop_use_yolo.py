@@ -7,6 +7,16 @@ import argparse
 # 입력한 디렉토리 내부에 있는 모든 이미지들을 predict 하고 결과를 저장.
 # 결과는 이미지와 라벨
 # 제외할 디렉토리 지정 가능
+#################################################
+# 1. 사용법
+#     https://huggingface.co/a-eyelab/yolo11s_iris 에서 yolo 모델 다운로드
+#     파일 아래쪽에 input_dir, output_dir, yolo model path 설정
+# 2. 주의
+#     1,0 디렉토리 그대로 output 디렉토리에 생성
+#     입력 디렉토리는 0,1 이 있는 상위 디렉토리 선택
+
+
+#################################################
 
 def predict_image(
         model,
