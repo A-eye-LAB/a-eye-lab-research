@@ -1,0 +1,93 @@
+# Train-Test Split Configuration for Cataract Dataset
+# This file defines how to split each dataset into train/test sets
+# while ensuring same-person eyes don't get split between train and test
+
+# Global settings
+global:
+  random_seed: 42
+  output_dir: "preprocessed/step4_train_test_split"
+
+# Dataset-specific configurations
+datasets:
+  # Dataset 1: Alexandra dataset (Random split - no person ID pattern)
+  01_pub_alexandra:
+    train_ratio: 0.8
+    test_ratio: 0.2
+    split_method: "random"
+    
+  # Dataset 2: Hemooredaoo dataset (Random split - no person ID pattern)
+  02_pub_hemooredaoo:
+    train_ratio: 0.8
+    test_ratio: 0.2
+    split_method: "random"
+    
+  # Dataset 3: Mohammed Gamal dataset (Random split - no person ID pattern)
+  03_pub_mohammedgamal37130:
+    train_ratio: 0.8
+    test_ratio: 0.2
+    split_method: "random"
+    
+  # Dataset 4: Krishna Bojha dataset (Random split - no person ID pattern)
+  04_pub_krishnabojha:
+    train_ratio: 0.8
+    test_ratio: 0.2
+    split_method: "random"
+    
+  # Dataset 5: Piygot5 dataset (Random split - no person ID pattern)
+  05_pub_piygot5:
+    train_ratio: 0.8
+    test_ratio: 0.2
+    split_method: "random"
+    
+  # Dataset 6: Kershrita dataset (Random split - no person ID pattern)
+  06_pub_kershrita:
+    train_ratio: 0.8
+    test_ratio: 0.2
+    split_method: "random"
+    
+  # Dataset 7: UBIPr dataset (Person-aware split)
+  07_pub_UBIPr:
+    train_ratio: 0.8
+    test_ratio: 0.2
+    split_method: "person_aware"
+    person_id_regex: "C(\\d+)"  # Extract C101, C103, etc.
+    
+  # Dataset 8: DIRL dataset (Person-aware split)
+  08_pub_DIRL:
+    train_ratio: 0.8  
+    test_ratio: 0.2
+    split_method: "person_aware"
+    person_id_regex: "(\\d{4})"  # Extract 0000, 0001, etc.
+    
+  # Dataset 9: Collected India Data App (Person-aware split)
+  09_collected_india_data_app:
+    train_ratio: 0.7
+    test_ratio: 0.3
+    split_method: "person_aware"
+    person_id_regex: "(\\d{8}_\\d{6})"  # Extract 20250405_174913
+    
+  # Dataset 10: Collected India Field Trip (Person-aware split)
+  10_collected_india_field_trip:
+    train_ratio: 0.6
+    test_ratio: 0.4
+    split_method: "person_aware"
+    person_id_regex: "([^=]+)"  # Extract Anchal, Anup, etc.
+    
+  # Dataset 11: Collected Korea Data (Person-aware split)
+  11_collected_kor_data:
+    train_ratio: 0.6
+    test_ratio: 0.4
+    split_method: "person_aware"
+    person_id_regex: "(\\d+)"  # Extract 00, 01, etc.
+
+# Output directory structure
+output_structure:
+  train_dir: "train"
+  test_dir: "test"
+  log_dir: "log"
+  
+# Validation rules
+validation:
+  min_train_samples: 10  # Minimum samples required in training set
+  min_test_samples: 5    # Minimum samples required in test set
+  max_person_overlap: 0  # Maximum allowed overlap of same person between train/test (0 = no overlap)
